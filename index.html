@@ -88,7 +88,8 @@ position:relative;
 overflow:hidden;
 }
 
-.follow-btn::before{
+.follow-btn::before,
+.upload-btn::before{
 content:"";
 position:absolute;
 inset:0;
@@ -102,7 +103,8 @@ animation:rgbBorder 4s linear infinite;
 mask-composite:exclude;
 }
 
-.follow-btn::after{
+.follow-btn::after,
+.upload-btn::after{
 content:"";
 position:absolute;
 inset:3px;
@@ -117,11 +119,6 @@ position:relative;
 z-index:2;
 }
 
-.upload-btn{
-border:2px solid red;
-margin-bottom:22px;
-}
-
 @keyframes rgbBorder{
 0%{background-position:0% 50%;}
 100%{background-position:300% 50%;}
@@ -131,39 +128,13 @@ margin-bottom:22px;
 width:100%;
 border:2px solid orange;
 border-radius:14px;
-padding:48px 14px 16px;
+padding:20px;
 margin-bottom:24px;
 background:#000;
 color:#fff;
 text-align:left;
 font-size:15px;
-line-height:27px;
-position:relative;
-}
-
-.translate-box{
-position:absolute;
-top:10px;
-right:10px;
-display:flex;
-gap:6px;
-}
-
-.translate-box button{
-background:#111;
-color:#fff;
-border:1px solid #777;
-border-radius:7px;
-padding:6px 9px;
-font-size:11px;
-cursor:pointer;
-}
-
-.tutorial-title{
-color:orange;
-font-weight:bold;
-font-size:18px;
-margin-bottom:10px;
+line-height:28px;
 }
 
 .injectwrap{
@@ -293,44 +264,33 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 
 <div class="box">
 
-<img src="icon.png" class="pp" onerror="this.style.display='none'">
+<img src="icon.png" class="pp">
 
 <h1>SAN METHOD<br>120FPS</h1>
 
 <div class="sub">NO KOMPRES TIKTOK METHOD</div>
 
-<a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
+<a href="https://www.tiktok.com/" target="_blank" class="follow-btn">
 <span>Follow TikTok</span>
 </a>
 
-<a href="https://www.tiktok.com/upload" target="_blank" class="upload-btn">
+<a href="https://san-method-120fps.neocities.org/index2" target="_blank" class="upload-btn">
 <span>Upload TikTok here</span>
 </a>
 
 <div class="tutorial">
-
-<div class="translate-box">
-<button onclick="setLang('en')">English</button>
-<button onclick="setLang('id')">Indonesia</button>
-</div>
-
-<div class="tutorial-title">Tutorials :</div>
-
-<div id="tutorialText">
 1. Pilih video MP4<br>
 2. Tekan INJECT VIDEO<br>
-3. Tunggu sampai proses selesai<br>
+3. Tunggu proses selesai<br>
 4. File otomatis download<br>
-5. Upload hasil ke TikTok lewat browser/web upload
-</div>
-
+5. Upload hasil lewat web TikTok desktop mode
 </div>
 
 <div class="injectwrap">
 
 <div class="file-box">
 <label class="file-label">Pilih video MP4:</label>
-<input id="videoInput" type="file" accept="video/mp4,.mp4">
+<input id="videoInput" type="file" accept="video/mp4">
 <div id="fileName" class="file-name">Belum ada file dipilih.</div>
 </div>
 
@@ -346,7 +306,9 @@ INJECT VIDEO
 <span>bash - core_process</span>
 </div>
 
-<div id="terminalBody" class="terminal-body">> Pilih video MP4 terlebih dahulu.</div>
+<div id="terminalBody" class="terminal-body">
+> Pilih video MP4 terlebih dahulu.
+</div>
 </div>
 
 <a id="downloadBtn" class="download-btn">
@@ -359,263 +321,152 @@ DOWNLOAD MANUAL
 <script src="./ffmpeg/ffmpeg.min.js"></script>
 
 <script>
-const videoInput=document.getElementById('videoInput');
-const fileName=document.getElementById('fileName');
-const injectBtn=document.getElementById('injectBtn');
-const terminal=document.getElementById('terminalBody');
-const downloadBtn=document.getElementById('downloadBtn');
+const { createFFmpeg, fetchFile } = FFmpeg;
 
-let selectedFile=null;
-let ffmpeg=null;
-let ffmpegLoaded=false;
-let currentBlobUrl=null;
+const videoInput = document.getElementById('videoInput');
+const fileName = document.getElementById('fileName');
+const injectBtn = document.getElementById('injectBtn');
+const terminal = document.getElementById('terminalBody');
+const downloadBtn = document.getElementById('downloadBtn');
 
-function setLang(lang){
-const text=document.getElementById("tutorialText");
-
-if(lang==="en"){
-text.innerHTML =
-'1. Choose your MP4 video<br>' +
-'2. Press INJECT VIDEO<br>' +
-'3. Wait until process complete<br>' +
-'4. File will auto download<br>' +
-'5. Upload result to TikTok using browser/web upload';
-}else{
-text.innerHTML =
-'1. Pilih video MP4<br>' +
-'2. Tekan INJECT VIDEO<br>' +
-'3. Tunggu sampai proses selesai<br>' +
-'4. File otomatis download<br>' +
-'5. Upload hasil ke TikTok lewat browser/web upload';
-}
-}
+let selectedFile = null;
 
 function log(text){
-terminal.textContent += text + '\n';
+terminal.textContent += text + '\\n';
 terminal.scrollTop = terminal.scrollHeight;
 }
 
 function clearTerminal(){
-terminal.textContent='';
-}
-
-function sleep(ms){
-return new Promise(resolve=>setTimeout(resolve,ms));
-}
-
-function resetDownload(){
-if(currentBlobUrl){
-URL.revokeObjectURL(currentBlobUrl);
-currentBlobUrl=null;
-}
-
-downloadBtn.style.display='none';
-downloadBtn.removeAttribute('href');
-downloadBtn.removeAttribute('download');
-}
-
-function baseUrl(){
-return window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
-}
-
-async function checkFile(url,name){
-const res=await fetch(url,{cache:'no-store'});
-if(!res.ok){
-throw new Error(name + " tidak kebaca. Status: " + res.status);
-}
-return true;
-}
-
-async function checkAssets(){
-const base=baseUrl();
-
-await checkFile(base+"ffmpeg/ffmpeg.min.js","ffmpeg.min.js");
-await checkFile(base+"ffmpeg/ffmpeg-core.js","ffmpeg-core.js");
-await checkFile(base+"ffmpeg/ffmpeg-core.worker.js","ffmpeg-core.worker.js");
-await checkFile(base+"ffmpeg/ffmpeg-core.wasm","ffmpeg-core.wasm");
-}
-
-async function loadFFmpeg(){
-if(ffmpegLoaded)return;
-
-if(!crossOriginIsolated){
-throw new Error("_headers belum aktif di Netlify.");
-}
-
-log('> [SYSTEM] Checking FFmpeg files...');
-await checkAssets();
-
-if(!window.FFmpeg){
-throw new Error("ffmpeg.min.js tidak terbaca oleh halaman.");
-}
-
-const createFFmpeg=window.FFmpeg.createFFmpeg;
-
-ffmpeg=createFFmpeg({
-log:false,
-corePath:baseUrl()+"ffmpeg/ffmpeg-core.js"
-});
-
-await ffmpeg.load();
-
-ffmpegLoaded=true;
-}
-
-function autoDownload(blob,outputName){
-const url=URL.createObjectURL(blob);
-currentBlobUrl=url;
-
-downloadBtn.href=url;
-downloadBtn.download=outputName;
-downloadBtn.style.display='block';
-
-const a=document.createElement('a');
-a.href=url;
-a.download=outputName;
-a.style.display='none';
-
-document.body.appendChild(a);
-a.click();
-
-setTimeout(()=>{
-a.click();
-},700);
-
-setTimeout(()=>{
-document.body.removeChild(a);
-},2000);
+terminal.textContent = '';
 }
 
 videoInput.addEventListener('change',()=>{
-selectedFile=videoInput.files[0];
-resetDownload();
+
+selectedFile = videoInput.files[0];
 
 if(!selectedFile){
-injectBtn.disabled=true;
-fileName.innerHTML='Belum ada file dipilih.';
-clearTerminal();
-log('> Pilih video MP4 terlebih dahulu.');
+injectBtn.disabled = true;
 return;
 }
 
-fileName.innerHTML='File: '+selectedFile.name;
-injectBtn.disabled=false;
+fileName.innerHTML = 'File: ' + selectedFile.name;
+
+injectBtn.disabled = false;
 
 clearTerminal();
 
 log('> [SYSTEM] MP4 stream confirmed');
 log('> [READY] Press INJECT VIDEO');
+
 });
 
-injectBtn.addEventListener('click',async()=>{
+injectBtn.addEventListener('click', async()=>{
 
-if(!selectedFile)return;
+if(!selectedFile) return;
 
-injectBtn.disabled=true;
-resetDownload();
+injectBtn.disabled = true;
+
 clearTerminal();
 
 try{
 
-log('> [SYSTEM] Target: '+selectedFile.name);
-await sleep(300);
-
+log('> [SYSTEM] Initializing process...');
+log('> [SYSTEM] Target: ' + selectedFile.name);
 log('> [SYSTEM] Verifying internal structure...');
-await sleep(400);
+log('> [SYSTEM] Track signature confirmed');
+log('> [SYSTEM] Loading FFmpeg core...');
 
-log('> [SYSTEM] Track signature confirmed. Extracted 2 block(s).');
-await sleep(400);
+const ffmpeg = createFFmpeg({
+log:false,
+corePath:'./ffmpeg/ffmpeg-core.js'
+});
 
-log('> [SYSTEM] Allocating buffer... OK');
-await sleep(350);
+await ffmpeg.load();
 
-log('> [SYSTEM] Loading core module...');
-await loadFFmpeg();
-
-log('> [SYSTEM] Core module loaded');
-await sleep(350);
-
-log('> [SYSTEM] Applying SAN method scale...');
-await sleep(350);
-
+log('> [SYSTEM] FFmpeg loaded');
+log('> [SYSTEM] Applying SAN method...');
 log('> [SYSTEM] Recompiling binary data...');
-await sleep(350);
+log('> [SYSTEM] Injecting browser upload metadata...');
 
-log('> [SYSTEM] Browser upload container mode enabled');
-await sleep(350);
-
-log('> [SYSTEM] Metadata injection active');
-await sleep(350);
-
-const inputName='input.mp4';
-const outputName='san method.mp4';
-
-const inputData=await window.FFmpeg.fetchFile(selectedFile);
-
-ffmpeg.FS('writeFile',inputName,inputData);
+ffmpeg.FS(
+'writeFile',
+'input.mp4',
+await fetchFile(selectedFile)
+);
 
 await ffmpeg.run(
+
 '-y',
 
-'-fflags','+genpts',
-'-i',inputName,
+'-i','input.mp4',
 
 '-map','0',
-'-c:v','copy',
-'-c:a','copy',
 
-'-copyts',
-'-avoid_negative_ts','make_zero',
+'-c:v','libx265',
+'-preset','slow',
+'-crf','16',
+
+'-pix_fmt','yuv420p',
+
+'-r','60',
+
+'-b:v','25M',
+'-maxrate','40M',
+'-bufsize','80M',
+
+'-c:a','aac',
+'-b:a','320k',
+
+'-movflags','+faststart+use_metadata_tags',
 
 '-video_track_timescale','90000',
 
-'-movflags','+faststart+use_metadata_tags',
-'-brand','mp42',
-
 '-metadata','major_brand=mp42',
-'-metadata','minor_version=0',
-'-metadata','compatible_brands=mp42isomavc1isom',
-'-metadata','encoder=Lavf61.7.100',
-'-metadata','FlyMediaPVG=PyPVG-10.0.0.2.203',
+'-metadata','compatible_brands=mp42isomavc1',
+'-metadata','encoder=iPhone 15 Pro Max',
 '-metadata','comment=SAN_METHOD_BROWSER_UPLOAD',
-'-metadata','handler_name=Core Media Video',
 
 '-metadata:s:v:0','handler_name=Core Media Video',
-'-metadata:s:v:0','vendor_id=[0][0][0][0]',
-
 '-metadata:s:a:0','handler_name=Core Media Audio',
-'-metadata:s:a:0','vendor_id=[0][0][0][0]',
 
-outputName
+'output.mp4'
 );
 
-const data=ffmpeg.FS('readFile',outputName);
+const data = ffmpeg.FS('readFile','output.mp4');
 
-const blob=new Blob(
+const blob = new Blob(
 [data.buffer],
-{type:'video/mp4'}
+{ type:'video/mp4' }
 );
 
-log('> [SUCCESS] Process completed successfully.');
-log('> [OUTPUT] '+outputName);
-log('> [SYSTEM] Auto downloading...');
+const url = URL.createObjectURL(blob);
 
-autoDownload(blob,outputName);
+downloadBtn.href = url;
+downloadBtn.download = 'san method.mp4';
+downloadBtn.style.display = 'block';
 
-try{
-ffmpeg.FS('unlink',inputName);
-ffmpeg.FS('unlink',outputName);
-}catch(e){}
+const a = document.createElement('a');
+
+a.href = url;
+a.download = 'san method.mp4';
+
+document.body.appendChild(a);
+
+a.click();
+
+document.body.removeChild(a);
+
+log('> [SUCCESS] Process completed');
+log('> [OUTPUT] san method.mp4');
+log('> [SYSTEM] Auto download started');
 
 }catch(err){
 
-log('> [FAILED] '+err.message);
-log('> [NOTE] Kalau hasil tetap 576p30, berarti TikTok web masih re-encode.');
-log('> [FIX] Metode ini sudah lebih agresif, tapi no-kompres 100% tetap tergantung TikTok.');
+log('> [FAILED] ' + err.message);
 
 }
 
-injectBtn.disabled=false;
+injectBtn.disabled = false;
 
 });
 </script>
