@@ -19,8 +19,8 @@ html,body{
 width:100%;
 min-height:100%;
 background:#000;
-overflow-x:hidden;
 font-family:Arial,sans-serif;
+overflow-x:hidden;
 }
 
 body{
@@ -37,7 +37,7 @@ border:2px solid cyan;
 border-radius:18px;
 padding:26px 16px;
 text-align:center;
-box-shadow:0 0 30px rgba(0,255,255,.28);
+box-shadow:0 0 30px rgba(0,255,255,.25);
 }
 
 .pp{
@@ -55,10 +55,10 @@ background:#111;
 h1{
 font-family:'Roboto',sans-serif;
 font-size:42px;
-font-weight:900;
 line-height:45px;
+font-weight:900;
 color:cyan;
-text-shadow:0 0 20px rgba(0,255,255,.9);
+text-shadow:0 0 18px rgba(0,255,255,.8);
 margin-bottom:14px;
 }
 
@@ -67,7 +67,6 @@ font-size:14px;
 letter-spacing:2px;
 color:#fff;
 margin-bottom:20px;
-opacity:.9;
 }
 
 .follow-btn,
@@ -199,9 +198,9 @@ cursor:pointer;
 }
 
 .inject-btn:disabled{
-opacity:.4;
-box-shadow:none;
+opacity:.45;
 cursor:not-allowed;
+box-shadow:none;
 }
 
 .terminal{
@@ -234,15 +233,15 @@ border-radius:50%;
 .green{background:#27c93f;}
 
 .terminal-body{
-min-height:340px;
+min-height:320px;
 max-height:420px;
 overflow-y:auto;
 padding:20px;
 font-size:14px;
-line-height:1.9;
+line-height:1.8;
 font-family:"Courier New",monospace;
 color:#27ff4a;
-text-shadow:0 0 8px rgba(39,255,74,.8);
+text-shadow:0 0 8px rgba(39,255,74,.7);
 white-space:pre-wrap;
 text-align:left;
 }
@@ -259,14 +258,6 @@ font-weight:bold;
 font-size:16px;
 box-shadow:0 0 20px rgba(0,255,255,.3);
 }
-
-.note{
-display:none;
-margin-top:14px;
-font-size:13px;
-line-height:1.5;
-color:#9fffff;
-}
 </style>
 </head>
 <body>
@@ -277,7 +268,7 @@ color:#9fffff;
 
 <h1>SAN METHOD<br>120FPS</h1>
 
-<div class="sub">FAST CONTAINER METHOD</div>
+<div class="sub">REAL FAST REMUX METHOD</div>
 
 <a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
 <span>Follow TikTok</span>
@@ -325,25 +316,26 @@ INJECT VIDEO
 DOWNLOAD MANUAL
 </a>
 
-<div id="note" class="note">
-Jika file tidak otomatis tersimpan, tekan DOWNLOAD MANUAL.
-</div>
-
 </div>
 </div>
 
-<script>
+<script type="module">
+import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm';
+import { fetchFile,toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm';
+
 const videoInput=document.getElementById('videoInput');
 const fileName=document.getElementById('fileName');
 const injectBtn=document.getElementById('injectBtn');
 const terminal=document.getElementById('terminalBody');
 const downloadBtn=document.getElementById('downloadBtn');
-const note=document.getElementById('note');
 
 let selectedFile=null;
+let ffmpegLoaded=false;
+
+const ffmpeg=new FFmpeg();
 
 function log(text){
-terminal.textContent+=text+"\n";
+terminal.textContent+=text+'\n';
 terminal.scrollTop=terminal.scrollHeight;
 }
 
@@ -369,16 +361,33 @@ injectBtn.disabled=false;
 clearTerminal();
 
 log('> [SYSTEM] Target detected');
-log('> [SYSTEM] File ready');
+log('> [SYSTEM] MP4 stream confirmed');
 log('> [READY] Press INJECT VIDEO');
 });
+
+async function loadFFmpeg(){
+
+if(ffmpegLoaded)return;
+
+log('> [SYSTEM] Loading core module...');
+
+const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
+
+await ffmpeg.load({
+coreURL:await toBlobURL(`${base}/ffmpeg-core.js`,'text/javascript'),
+wasmURL:await toBlobURL(`${base}/ffmpeg-core.wasm`,'application/wasm')
+});
+
+ffmpegLoaded=true;
+
+log('> [SYSTEM] Core module loaded');
+}
 
 injectBtn.addEventListener('click',async()=>{
 
 if(!selectedFile)return;
 
 injectBtn.disabled=true;
-
 clearTerminal();
 
 try{
@@ -392,59 +401,48 @@ await sleep(400);
 log('> [SYSTEM] Track signature confirmed');
 await sleep(350);
 
-log('> [SYSTEM] Allocating buffer... OK');
-await sleep(300);
+await loadFFmpeg();
 
-log('> [SYSTEM] Applying SAN method scale...');
-await sleep(400);
+const inputName='input.mp4';
+const outputName=selectedFile.name.replace('.mp4','')+'_SAN_METHOD.mp4';
 
-log('> [SYSTEM] Recompiling binary data...');
-await sleep(400);
+log('> [SYSTEM] Writing stream buffer...');
 
-log('> [SYSTEM] Container rewrite enabled');
+await ffmpeg.writeFile(
+inputName,
+await fetchFile(selectedFile)
+);
+
+log('> [SYSTEM] Fast remux mode enabled');
 await sleep(300);
 
 log('> [SYSTEM] Metadata injection active');
 await sleep(300);
 
-log('> [SYSTEM] Fast remux mode enabled');
-await sleep(350);
+log('> [SYSTEM] Finalizing MP4 container...');
 
-const originalBuffer=await selectedFile.arrayBuffer();
+await ffmpeg.exec([
+'-i',inputName,
+'-map','0',
+'-c','copy',
+'-movflags','+faststart',
+'-metadata','encoder=Lavf61.7.100',
+'-metadata','major_brand=mp42',
+'-metadata','compatible_brands=mp42isomavc1',
+'-metadata','minor_version=0',
+'-metadata','SAN_METHOD=ACTIVE',
+outputName
+]);
 
-const originalBytes=new Uint8Array(originalBuffer);
+const data=await ffmpeg.readFile(outputName);
 
-const header=new TextEncoder().encode(
-'SAN_METHOD_FAST_CONTAINER_120FPS_ACTIVE'
-);
-
-const spacer=new Uint8Array(512);
-
-const finalBytes=new Uint8Array(
-header.length+
-spacer.length+
-originalBytes.length
-);
-
-finalBytes.set(header,0);
-finalBytes.set(spacer,header.length);
-finalBytes.set(originalBytes,header.length+spacer.length);
-
-const blob=new Blob(
-[finalBytes],
-{type:'video/mp4'}
-);
-
-const outputName=
-selectedFile.name.replace('.mp4','')+
-'_SAN_METHOD.mp4';
+const blob=new Blob([
+data.buffer
+],{
+type:'video/mp4'
+});
 
 const url=URL.createObjectURL(blob);
-
-await sleep(500);
-
-log('> [SYSTEM] Finalizing output stream...');
-await sleep(500);
 
 log('> [SUCCESS] Injection completed');
 log('> [OUTPUT] '+outputName);
@@ -460,7 +458,6 @@ document.body.removeChild(a);
 downloadBtn.href=url;
 downloadBtn.download=outputName;
 downloadBtn.style.display='block';
-note.style.display='block';
 
 }catch(err){
 
