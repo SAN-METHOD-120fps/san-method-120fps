@@ -3,504 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAN METHOD 120FPS</title>
-
+<title>SAN METHOD HD 120FPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #0c0c0c;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
 }
-
-html,body{
-  width:100%;
-  min-height:100%;
-  background:#000;
-  font-family:Arial,sans-serif;
-  overflow-x:hidden;
+.container {
+    max-width: 500px;
+    width: 100%;
+    border: 2px solid #00d6e3;
+    border-radius: 16px;
+    padding: 20px;
 }
-
-body{
-  display:flex;
-  justify-content:center;
-  padding:18px 10px;
+h2 { text-align: center; margin-bottom: 20px; }
+input[type=file] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background: #111;
+    color: #fff;
+    border: 1px solid #00d6e3;
 }
-
-.box{
-  width:100%;
-  max-width:430px;
-  background:#050505;
-  border:2px solid cyan;
-  border-radius:18px;
-  padding:28px 18px;
-  text-align:center;
+#dropZone {
+    border: 2px dashed #00d6e3;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 15px;
+    cursor: pointer;
 }
-
-.pp{
-  width:110px;
-  height:110px;
-  border-radius:50%;
-  object-fit:cover;
-  border:4px solid cyan;
-  display:block;
-  margin:0 auto 24px;
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    background: #00d6e3;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 15px;
 }
-
-h1{
-  font-size:46px;
-  line-height:48px;
-  font-weight:900;
-  color:cyan;
-  margin-bottom:18px;
-  letter-spacing:1px;
+.console {
+    background: #111;
+    color: #0f0;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    height: 200px;
+    overflow-y: auto;
 }
-
-.sub{
-  font-size:15px;
-  color:#fff;
-  margin-bottom:22px;
-  letter-spacing:2px;
-  opacity:.9;
-}
-
-.follow-btn,
-.upload-btn{
-  width:100%;
-  height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  background:#000;
-  text-decoration:none;
-  font-size:21px;
-  font-weight:900;
-  letter-spacing:1px;
-  color:#fff;
-  margin-bottom:18px;
-  position:relative;
-  overflow:hidden;
-}
-
-.follow-btn::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  padding:2px;
-  border-radius:14px;
-  background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
-  background-size:300% 300%;
-  animation:rgbBorder 4s linear infinite;
-
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-
-  -webkit-mask-composite:xor;
-  mask-composite:exclude;
-}
-
-.follow-btn::after{
-  content:"";
-  position:absolute;
-  inset:2px;
-  background:#000;
-  border-radius:12px;
-  z-index:1;
-}
-
-.follow-btn span,
-.upload-btn span{
-  position:relative;
-  z-index:2;
-}
-
-.upload-btn{
-  border:2px solid red;
-}
-
-@keyframes rgbBorder{
-  0%{background-position:0% 50%;}
-  100%{background-position:300% 50%;}
-}
-
-/* tutorial */
-.tutorial{
-  width:100%;
-  border:2px solid orange;
-  border-radius:14px;
-  padding:48px 20px 24px;
-  margin-bottom:24px;
-  background:#000;
-  color:#fff;
-  text-align:left;
-  font-size:21px;
-  line-height:1.8;
-  position:relative;
-}
-
-.translate-box{
-  position:absolute;
-  top:14px;
-  right:14px;
-  display:flex;
-  gap:8px;
-}
-
-.lang-btn{
-  background:#111;
-  color:#777;
-  border:2px solid #555;
-  border-radius:12px;
-  padding:10px 18px;
-  font-size:14px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.lang-btn.active{
-  background:#fff;
-  color:#000;
-  border-color:#fff;
-}
-
-.tutorial-title{
-  color:orange;
-  font-weight:900;
-  font-size:28px;
-  margin-bottom:28px;
-}
-
-#tutorialText{
-  font-size:21px;
-  line-height:1.7;
-}
-
-/* inject */
-.injectwrap{
-  width:100%;
-  padding:12px;
-  border:2px solid cyan;
-  border-radius:16px;
-  background:#000;
-}
-
-.file-box{
-  border:1px solid rgba(0,255,255,.7);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:24px;
-  text-align:left;
-  background:#020707;
-}
-
-.file-label{
-  font-size:14px;
-  color:#9fffff;
-  margin-bottom:10px;
-  display:block;
-}
-
-input[type=file]{
-  width:100%;
-  background:#000;
-  border:1px solid rgba(0,255,255,.4);
-  border-radius:10px;
-  padding:12px;
-  font-size:15px;
-  color:cyan;
-}
-
-.file-name{
-  margin-top:12px;
-  font-size:14px;
-  line-height:1.5;
-  color:#19fff4;
-  word-break:break-all;
-}
-
-.inject-btn{
-  width:100%;
-  border:none;
-  border-radius:14px;
-  padding:24px 10px;
-  margin-bottom:28px;
-  background:#23d3d3;
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:8px;
-  color:#000;
-  cursor:pointer;
-}
-
-.inject-btn:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
-/* terminal */
-.terminal{
-  border-radius:16px;
-  overflow:hidden;
-  background:#000;
-  border:1px solid rgba(255,255,255,.12);
-}
-
-.terminal-header{
-  height:52px;
-  background:#1d1d1d;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:0 18px;
-  font-size:14px;
-  letter-spacing:4px;
-  color:#777;
-}
-
-.dot{
-  width:17px;
-  height:17px;
-  border-radius:50%;
-}
-
-.red{background:#ff5f56;}
-.yellow{background:#ffbd2e;}
-.green{background:#27c93f;}
-
-.terminal-body{
-  min-height:320px;
-  max-height:420px;
-  overflow-y:auto;
-  padding:20px;
-  font-size:14px;
-  line-height:1.8;
-  font-family:"Courier New",monospace;
-  color:#27ff4a;
-  white-space:pre-wrap;
-  text-align:left;
-}
-
-.download-btn{
-  display:none;
-  margin-top:18px;
-  padding:16px;
-  border:2px solid cyan;
-  border-radius:14px;
-  text-decoration:none;
-  color:cyan;
-  font-weight:bold;
-  font-size:16px;
-}
-
-@media(max-width:480px){
-  h1{
-    font-size:42px;
-    line-height:44px;
-  }
-
-  .tutorial{
-    font-size:18px;
-    padding:48px 18px 22px;
-  }
-
-  .tutorial-title{
-    font-size:25px;
-    margin-bottom:22px;
-  }
-
-  #tutorialText{
-    font-size:18px;
-  }
-
-  .lang-btn{
-    font-size:13px;
-    padding:8px 14px;
-  }
+video {
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 8px;
 }
 </style>
 </head>
-
 <body>
-
-<div class="box">
-
-<img src="icon.png" class="pp">
-
-<h1>SAN METHOD<br>120FPS</h1>
-
-<div class="sub">NO KOMPRES TIKTOK METHOD</div>
-
-<a href="https://www.tiktok.com/" target="_blank" class="follow-btn">
-<span>Follow TikTok</span>
-</a>
-
-<a href="https://san-method-120fps.neocities.org/index2" target="_blank" class="upload-btn">
-<span>Upload TikTok here</span>
-</a>
-
-<div class="tutorial">
-
-<div class="translate-box">
-<button id="enBtn" class="lang-btn" onclick="setLang('en')">English</button>
-<button id="idBtn" class="lang-btn active" onclick="setLang('id')">Indonesia</button>
+<div class="container">
+    <h2>SAN METHOD HD 120FPS</h2>
+    <div id="dropZone">Drag & Drop video atau klik di sini</div>
+    <input type="file" id="videoFile" accept="video/mp4" style="display:none;">
+    <video id="previewVideo" controls></video>
+    <button id="injectBtn">INJECT VIDEO</button>
+    <div class="console" id="consoleOutput"></div>
 </div>
 
-<div class="tutorial-title">Tutorials :</div>
-
-<div id="tutorialText">
-1. Inject video kalian yang sudah di wink/hd<br><br>
-2. Pencet "Upload TikTok here"
-</div>
-
-</div>
-
-<div class="injectwrap">
-
-<div class="file-box">
-<label class="file-label">Pilih video MP4:</label>
-<input id="videoInput" type="file" accept="video/mp4">
-<div id="fileName" class="file-name">Belum ada file dipilih.</div>
-</div>
-
-<button id="injectBtn" class="inject-btn" disabled>
-INJECT VIDEO
-</button>
-
-<div class="terminal">
-<div class="terminal-header">
-<span class="dot red"></span>
-<span class="dot yellow"></span>
-<span class="dot green"></span>
-<span>bash - core_process</span>
-</div>
-
-<div id="terminalBody" class="terminal-body">
-> Pilih video MP4 terlebih dahulu.
-</div>
-</div>
-
-<a id="downloadBtn" class="download-btn">
-DOWNLOAD MANUAL
-</a>
-
-</div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.11/dist/ffmpeg.min.js"></script>
 <script>
-function setLang(lang){
+const { createFFmpeg, fetchFile } = FFmpeg;
+const ffmpeg = createFFmpeg({ log: false });
+const consoleEl = document.getElementById('consoleOutput');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('videoFile');
+const previewVideo = document.getElementById('previewVideo');
 
-const text = document.getElementById("tutorialText");
-const enBtn = document.getElementById("enBtn");
-const idBtn = document.getElementById("idBtn");
-
-enBtn.classList.remove("active");
-idBtn.classList.remove("active");
-
-if(lang === "en"){
-text.innerHTML =
-'1. Inject your video that has already been enhanced in Wink/HD<br><br>' +
-'2. Click "Upload TikTok here"';
-
-enBtn.classList.add("active");
-
-}else{
-text.innerHTML =
-'1. Inject video kalian yang sudah di wink/hd<br><br>' +
-'2. Pencet "Upload TikTok here"';
-
-idBtn.classList.add("active");
-}
+function logConsole(text) {
+    consoleEl.innerHTML += text + '<br>';
+    consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
-const videoInput = document.getElementById('videoInput');
-const fileName = document.getElementById('fileName');
-const injectBtn = document.getElementById('injectBtn');
-const terminal = document.getElementById('terminalBody');
-const downloadBtn = document.getElementById('downloadBtn');
-
-let selectedFile = null;
-
-function log(text){
-terminal.textContent += text + '\n';
-terminal.scrollTop = terminal.scrollHeight;
-}
-
-function clearTerminal(){
-terminal.textContent = '';
-}
-
-videoInput.addEventListener('change',()=>{
-
-selectedFile = videoInput.files[0];
-
-if(!selectedFile){
-injectBtn.disabled = true;
-return;
-}
-
-fileName.innerHTML = 'File: ' + selectedFile.name;
-
-injectBtn.disabled = false;
-
-clearTerminal();
-
-log('> [SYSTEM] MP4 stream confirmed');
-log('> [READY] Press INJECT VIDEO');
-
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => e.preventDefault());
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+    }
 });
 
-injectBtn.addEventListener('click', async()=>{
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-if(!selectedFile) return;
-
-injectBtn.disabled = true;
-
-clearTerminal();
-
-try{
-
-log('> [SYSTEM] Initializing process...');
-log('> [SYSTEM] Target: ' + selectedFile.name);
-log('> [SYSTEM] Preparing encode settings...');
-log('> [SYSTEM] Applying video process...');
-
-await new Promise(resolve => setTimeout(resolve,1500));
-
-log('> [SYSTEM] Processing binary data...');
-
-await new Promise(resolve => setTimeout(resolve,1500));
-
-const blob = new Blob([selectedFile], { type:'video/mp4' });
-
-const url = URL.createObjectURL(blob);
-
-const a = document.createElement('a');
-a.href = url;
-a.download = 'san_method_output.mp4';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-
-downloadBtn.href = url;
-downloadBtn.download = 'san_method_output.mp4';
-downloadBtn.style.display = 'block';
-
-log('> [SUCCESS] Process completed');
-log('> [OUTPUT] san_method_output.mp4');
-log('> [SYSTEM] Download started');
-
-}catch(err){
-
-log('> [FAILED] ' + err.message);
-
+function handleFile(file) {
+    previewVideo.src = URL.createObjectURL(file);
+    previewVideo.load();
+    previewVideo.play();
+    fileInput.file = file; // simpan file
+    logConsole(`[SYSTEM] File siap: ${file.name}`);
 }
 
-injectBtn.disabled = false;
+document.getElementById('injectBtn').addEventListener('click', async () => {
+    const file = fileInput.file;
+    if (!file) return alert('Pilih video terlebih dahulu!');
+    logConsole('[SYSTEM] Memulai proses...');
 
+    if (!ffmpeg.isLoaded()) {
+        logConsole('[SYSTEM] Memuat engine...');
+        await ffmpeg.load();
+    }
+
+    logConsole('[SYSTEM] Menyalin file...');
+    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+
+    logConsole('[SYSTEM] Memproses video dengan 120FPS...');
+    try {
+        await ffmpeg.run(
+            '-i', 'input.mp4',
+            '-filter:v', 'fps=120',
+            '-c:v', 'libx264',
+            '-b:v', '24M',
+            '-minrate', '24M',
+            '-maxrate', '24M',
+            '-bufsize', '48M',
+            '-preset', 'medium',
+            '-c:a', 'copy',
+            'san_method_hd.mp4'
+        );
+
+        logConsole('[SYSTEM] Selesai! Menyiapkan download...');
+        const data = ffmpeg.FS('readFile', 'san_method_hd.mp4');
+        const blob = new Blob([data.buffer], { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'san_method_hd.mp4';
+        a.click();
+
+        logConsole('[SYSTEM] Video berhasil diunduh: san_method_hd.mp4');
+    } catch (err) {
+        logConsole('[FAILED] Terjadi kesalahan: ' + err.message);
+    }
 });
 </script>
-
 </body>
 </html>
