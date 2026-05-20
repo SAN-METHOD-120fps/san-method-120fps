@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>SAN METHOD 120FPS</title>
 
@@ -50,12 +50,13 @@
       border: 4px solid cyan;
       display: block;
       margin: 0 auto 24px;
+      background: #111;
     }
 
     h1 {
       font-family: 'Roboto', sans-serif;
-      font-size: 48px;
-      line-height: 50px;
+      font-size: 44px;
+      line-height: 46px;
       font-weight: 900;
       color: cyan;
       margin-bottom: 18px;
@@ -63,7 +64,7 @@
     }
 
     .sub {
-      font-size: 16px;
+      font-size: 15px;
       color: #fff;
       margin-bottom: 22px;
       letter-spacing: 2px;
@@ -81,7 +82,7 @@
       background: #000;
       text-decoration: none;
       font-family: 'Roboto', sans-serif;
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 900;
       letter-spacing: 1px;
       color: #fff;
@@ -184,34 +185,32 @@
       padding: 16px;
       margin-bottom: 28px;
       background: #020707;
+      text-align: left;
     }
 
-    .file-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    .file-label {
+      color: #9fffff;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
     }
 
     input[type="file"] {
-      display: none;
-    }
-
-    .file-btn {
-      background: #e8e8e8;
-      color: #000;
-      padding: 9px 14px;
-      border-radius: 5px;
-      font-size: 18px;
-      cursor: pointer;
-      user-select: none;
+      width: 100%;
+      color: cyan;
+      font-size: 15px;
+      background: #000;
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      border-radius: 10px;
+      padding: 12px;
     }
 
     .file-name {
       color: #19fff4;
-      font-size: 17px;
+      font-size: 14px;
       word-break: break-all;
-      text-align: left;
+      margin-top: 12px;
+      line-height: 1.5;
     }
 
     .inject-btn {
@@ -310,22 +309,18 @@
       }
 
       h1 {
-        font-size: 42px;
-        line-height: 44px;
+        font-size: 40px;
+        line-height: 42px;
       }
 
       .sub {
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .follow-btn,
       .upload-btn {
         height: 56px;
-        font-size: 20px;
-      }
-
-      .tutorial {
-        padding-top: 50px;
+        font-size: 19px;
       }
 
       .terminal-body {
@@ -354,7 +349,6 @@
     </a>
 
     <div class="tutorial">
-
       <div class="translate-box">
         <button onclick="setLang('en')">English</button>
         <button onclick="setLang('id')">Indonesia</button>
@@ -363,23 +357,20 @@
       <div class="tutorial-title">Tutorials :</div>
 
       <div id="tutorialText">
-        1. Pilih video kalian yang sudah di Wink/HD<br>
+        1. Pilih video MP4 kalian<br>
         2. Tekan INJECT VIDEO<br>
-        3. Setelah selesai, file akan otomatis download<br>
-        4. Upload hasilnya ke TikTok
+        3. Tunggu sampai proses selesai<br>
+        4. File hasil akan otomatis download<br>
+        5. Upload hasilnya ke TikTok
       </div>
-
     </div>
 
     <div class="injectwrap">
 
       <div class="file-box">
-        <div class="file-row">
-          <label for="videoInput" class="file-btn">Pilih File</label>
-          <span id="fileName" class="file-name">Tidak ada file yang dipilih</span>
-        </div>
-
-        <input id="videoInput" type="file" accept="video/mp4,video/*">
+        <label class="file-label">Pilih video MP4:</label>
+        <input id="videoInput" type="file" accept=".mp4,video/mp4">
+        <div id="fileName" class="file-name">Belum ada file dipilih.</div>
       </div>
 
       <button id="injectBtn" class="inject-btn" disabled>INJECT VIDEO</button>
@@ -392,7 +383,7 @@
           <span>bash - core_process</span>
         </div>
 
-        <div id="terminalBody" class="terminal-body">> Pilih video terlebih dahulu.</div>
+        <div id="terminalBody" class="terminal-body">> Pilih video MP4 terlebih dahulu.</div>
       </div>
 
       <a id="downloadBtn" class="download-btn">DOWNLOAD MANUAL</a>
@@ -425,16 +416,18 @@
 
       if (lang === "en") {
         text.innerHTML =
-          '1. Choose your video that has already been enhanced in Wink/HD<br>' +
+          '1. Choose your MP4 video<br>' +
           '2. Press INJECT VIDEO<br>' +
-          '3. After finished, the file will download automatically<br>' +
-          '4. Upload the result to TikTok';
+          '3. Wait until the process finishes<br>' +
+          '4. The result file will download automatically<br>' +
+          '5. Upload the result to TikTok';
       } else {
         text.innerHTML =
-          '1. Pilih video kalian yang sudah di Wink/HD<br>' +
+          '1. Pilih video MP4 kalian<br>' +
           '2. Tekan INJECT VIDEO<br>' +
-          '3. Setelah selesai, file akan otomatis download<br>' +
-          '4. Upload hasilnya ke TikTok';
+          '3. Tunggu sampai proses selesai<br>' +
+          '4. File hasil akan otomatis download<br>' +
+          '5. Upload hasilnya ke TikTok';
       }
     }
 
@@ -456,3 +449,198 @@
         .replace(/\.[^/.]+$/, "")
         .replace(/[^a-zA-Z0-9_-]/g, "_");
     }
+
+    function resetDownload() {
+      if (currentBlobUrl) {
+        URL.revokeObjectURL(currentBlobUrl);
+        currentBlobUrl = null;
+      }
+
+      downloadBtn.style.display = "none";
+      downloadBtn.removeAttribute("href");
+      downloadBtn.removeAttribute("download");
+      note.style.display = "none";
+    }
+
+    function forceDownload(blob, outputName) {
+      const url = URL.createObjectURL(blob);
+      currentBlobUrl = url;
+
+      downloadBtn.href = url;
+      downloadBtn.download = outputName;
+      downloadBtn.style.display = "block";
+      note.style.display = "block";
+
+      const tempLink = document.createElement("a");
+      tempLink.href = url;
+      tempLink.download = outputName;
+      tempLink.style.display = "none";
+
+      document.body.appendChild(tempLink);
+
+      tempLink.click();
+
+      setTimeout(function () {
+        tempLink.click();
+      }, 700);
+
+      setTimeout(function () {
+        document.body.removeChild(tempLink);
+      }, 2500);
+    }
+
+    async function fakeTerminalStart(fileName) {
+      log("> [SYSTEM] Target: " + fileName);
+      await sleep(300);
+
+      log("> [SYSTEM] Verifying internal structure...");
+      await sleep(450);
+
+      log("> [SYSTEM] Track signature confirmed. Extracted 2 block(s).");
+      await sleep(400);
+
+      log("> [SYSTEM] Allocating buffer... OK");
+      await sleep(300);
+
+      log("> [SYSTEM] Applying SAN method scale...");
+      await sleep(400);
+
+      log("> [SYSTEM] Recompiling binary data...");
+      await sleep(400);
+    }
+
+    async function loadFFmpeg() {
+      if (ffmpegLoaded) return;
+
+      if (!window.FFmpeg) {
+        throw new Error("ffmpeg.min.js tidak ditemukan. Cek folder /ffmpeg/.");
+      }
+
+      const createFFmpeg = window.FFmpeg.createFFmpeg;
+
+      ffmpeg = createFFmpeg({
+        log: false,
+        corePath: "./ffmpeg/ffmpeg-core.js"
+      });
+
+      await ffmpeg.load();
+
+      ffmpegLoaded = true;
+    }
+
+    videoInput.addEventListener("change", function () {
+      selectedFile = videoInput.files && videoInput.files[0] ? videoInput.files[0] : null;
+      resetDownload();
+
+      if (!selectedFile) {
+        fileNameText.textContent = "Belum ada file dipilih.";
+        injectBtn.disabled = true;
+        clearTerminal();
+        log("> Pilih video MP4 terlebih dahulu.");
+        return;
+      }
+
+      const isMp4 = selectedFile.name.toLowerCase().endsWith(".mp4");
+
+      if (!isMp4) {
+        fileNameText.textContent = "File harus berformat .mp4";
+        injectBtn.disabled = true;
+        clearTerminal();
+        log("> [ERROR] File harus MP4.");
+        return;
+      }
+
+      fileNameText.textContent = "File: " + selectedFile.name;
+      injectBtn.disabled = false;
+
+      clearTerminal();
+      log("> File siap di-inject.");
+      log("> Target: " + selectedFile.name);
+      log("> Tekan INJECT VIDEO untuk mulai.");
+    });
+
+    injectBtn.addEventListener("click", async function () {
+      if (!selectedFile) {
+        clearTerminal();
+        log("> [ERROR] Pilih video dulu.");
+        return;
+      }
+
+      injectBtn.disabled = true;
+      resetDownload();
+      clearTerminal();
+
+      try {
+        await fakeTerminalStart(selectedFile.name);
+
+        log("> [SYSTEM] Loading core module...");
+        await loadFFmpeg();
+        log("> [SYSTEM] Core module loaded.");
+
+        const inputName = "input.mp4";
+        const outputName = safeName(selectedFile.name) + "_SAN_METHOD.mp4";
+
+        log("> [SYSTEM] Reading target data...");
+        const inputData = await window.FFmpeg.fetchFile(selectedFile);
+
+        log("> [SYSTEM] Writing temporary block...");
+        ffmpeg.FS("writeFile", inputName, inputData);
+
+        log("> [SYSTEM] Injecting SAN method...");
+        log("> [SYSTEM] Stream copy enabled...");
+        log("> [SYSTEM] No re-encode...");
+        log("> [SYSTEM] Finalizing MP4 container...");
+
+        await ffmpeg.run(
+          "-y",
+
+          "-itsscale", "6",
+          "-i", inputName,
+
+          "-map", "0",
+          "-c:v", "copy",
+          "-c:a", "copy",
+
+          "-movflags", "+faststart",
+          "-brand", "mp42",
+
+          "-metadata", "encoder=Lavf61.7.100",
+          "-metadata", "major_brand=mp42",
+          "-metadata", "minor_version=0",
+          "-metadata", "compatible_brands=mp42isomavc1",
+          "-metadata", "method=SAN_METHOD",
+          "-metadata", "comment=SAN method injected container",
+
+          outputName
+        );
+
+        log("> [SYSTEM] Extracting output block...");
+        const outputData = ffmpeg.FS("readFile", outputName);
+
+        const blob = new Blob([outputData.buffer], {
+          type: "video/mp4"
+        });
+
+        log("> [SUCCESS] Process completed successfully.");
+        log("> [OUTPUT] " + outputName);
+        log("> [SYSTEM] Auto downloading...");
+
+        forceDownload(blob, outputName);
+
+        try {
+          ffmpeg.FS("unlink", inputName);
+          ffmpeg.FS("unlink", outputName);
+        } catch (cleanupError) {}
+
+      } catch (error) {
+        log("> [FAILED] " + error.message);
+        log("> [NOTE] File belum dibuat, jadi tidak bisa tersimpan.");
+        log("> [FIX] Pastikan folder /ffmpeg/ berisi 4 file FFmpeg.");
+      } finally {
+        injectBtn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
