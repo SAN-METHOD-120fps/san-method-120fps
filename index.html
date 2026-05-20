@@ -414,22 +414,46 @@ downloadBtn.removeAttribute('href');
 downloadBtn.removeAttribute('download');
 }
 
+function baseUrl(){
+return window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+}
+
+async function checkFile(url,name){
+const res=await fetch(url,{cache:'no-store'});
+if(!res.ok){
+throw new Error(name + " tidak kebaca. Status: " + res.status);
+}
+return true;
+}
+
+async function checkAssets(){
+const base=baseUrl();
+
+await checkFile(base+"ffmpeg/ffmpeg.min.js","ffmpeg.min.js");
+await checkFile(base+"ffmpeg/ffmpeg-core.js","ffmpeg-core.js");
+await checkFile(base+"ffmpeg/ffmpeg-core.worker.js","ffmpeg-core.worker.js");
+await checkFile(base+"ffmpeg/ffmpeg-core.wasm","ffmpeg-core.wasm");
+}
+
 async function loadFFmpeg(){
 if(ffmpegLoaded)return;
 
 if(!crossOriginIsolated){
-throw new Error("SharedArrayBuffer belum aktif. File _headers belum terbaca Netlify.");
+throw new Error("_headers belum aktif di Netlify. Deploy ulang dulu.");
 }
 
+log('> [SYSTEM] Checking FFmpeg files...');
+await checkAssets();
+
 if(!window.FFmpeg){
-throw new Error("ffmpeg.min.js tidak terbaca.");
+throw new Error("ffmpeg.min.js tidak terbaca oleh halaman.");
 }
 
 const createFFmpeg=window.FFmpeg.createFFmpeg;
 
 ffmpeg=createFFmpeg({
 log:false,
-corePath:"./ffmpeg/ffmpeg-core.js"
+corePath:baseUrl()+"ffmpeg/ffmpeg-core.js"
 });
 
 await ffmpeg.load();
@@ -566,8 +590,8 @@ ffmpeg.FS('unlink',outputName);
 }catch(err){
 
 log('> [FAILED] '+err.message);
-log('> [NOTE] Edit di GitHub, lalu tunggu Netlify deploy sampai Published.');
-log('> [FIX] Pastikan file _headers ada di root repo.');
+log('> [NOTE] Kalau gagal di Checking FFmpeg files, berarti file FFmpeg belum kebaca dari Netlify.');
+log('> [FIX] Tunggu deploy Netlify Published lalu buka pakai ?v=99');
 
 }
 
