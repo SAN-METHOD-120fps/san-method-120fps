@@ -359,6 +359,8 @@ DOWNLOAD MANUAL
 </div>
 </div>
 
+<script src="./ffmpeg/ffmpeg.min.js"></script>
+
 <script>
 const videoInput=document.getElementById('videoInput');
 const fileName=document.getElementById('fileName');
@@ -367,6 +369,9 @@ const terminal=document.getElementById('terminalBody');
 const downloadBtn=document.getElementById('downloadBtn');
 
 let selectedFile=null;
+let ffmpeg=null;
+let ffmpegLoaded=false;
+let currentBlobUrl=null;
 
 function setLang(lang){
 const text=document.getElementById("tutorialText");
@@ -401,11 +406,70 @@ function sleep(ms){
 return new Promise(resolve=>setTimeout(resolve,ms));
 }
 
+function resetDownload(){
+if(currentBlobUrl){
+URL.revokeObjectURL(currentBlobUrl);
+currentBlobUrl=null;
+}
+
+downloadBtn.style.display='none';
+downloadBtn.removeAttribute('href');
+downloadBtn.removeAttribute('download');
+}
+
+async function loadFFmpeg(){
+if(ffmpegLoaded)return;
+
+if(!window.FFmpeg){
+throw new Error("ffmpeg.min.js tidak ditemukan.");
+}
+
+const createFFmpeg=window.FFmpeg.createFFmpeg;
+
+ffmpeg=createFFmpeg({
+log:false,
+corePath:"./ffmpeg/ffmpeg-core.js"
+});
+
+await ffmpeg.load();
+
+ffmpegLoaded=true;
+}
+
+function autoDownload(blob,outputName){
+const url=URL.createObjectURL(blob);
+currentBlobUrl=url;
+
+downloadBtn.href=url;
+downloadBtn.download=outputName;
+downloadBtn.style.display='block';
+
+const a=document.createElement('a');
+a.href=url;
+a.download=outputName;
+a.style.display='none';
+
+document.body.appendChild(a);
+a.click();
+
+setTimeout(()=>{
+a.click();
+},700);
+
+setTimeout(()=>{
+document.body.removeChild(a);
+},2000);
+}
+
 videoInput.addEventListener('change',()=>{
 selectedFile=videoInput.files[0];
+resetDownload();
 
 if(!selectedFile){
 injectBtn.disabled=true;
+fileName.innerHTML='Belum ada file dipilih.';
+clearTerminal();
+log('> Pilih video MP4 terlebih dahulu.');
 return;
 }
 
@@ -423,6 +487,7 @@ injectBtn.addEventListener('click',async()=>{
 if(!selectedFile)return;
 
 injectBtn.disabled=true;
+resetDownload();
 clearTerminal();
 
 try{
@@ -439,6 +504,12 @@ await sleep(400);
 log('> [SYSTEM] Allocating buffer... OK');
 await sleep(350);
 
+log('> [SYSTEM] Loading core module...');
+await loadFFmpeg();
+
+log('> [SYSTEM] Core module loaded');
+await sleep(350);
+
 log('> [SYSTEM] Applying SAN method scale...');
 await sleep(350);
 
@@ -451,38 +522,56 @@ await sleep(350);
 log('> [SYSTEM] Metadata injection active');
 await sleep(350);
 
-const buffer=await selectedFile.arrayBuffer();
-const bytes=new Uint8Array(buffer);
+const inputName='input.mp4';
+const outputName='san method.mp4';
 
-const outputName="san method.mp4";
+const inputData=await window.FFmpeg.fetchFile(selectedFile);
 
-const blob=new Blob(
-[bytes],
-{type:'video/mp4'}
+ffmpeg.FS('writeFile',inputName,inputData);
+
+await ffmpeg.run(
+'-y',
+
+'-i',inputName,
+
+'-map','0',
+'-c','copy',
+
+'-movflags','+faststart',
+
+'-metadata','FlyMediaPVG=PyPVG-10.0.0.2.203',
+'-metadata','encoder=Lavf61.7.100',
+'-metadata','major_brand=mp42',
+'-metadata','minor_version=0',
+'-metadata','compatible_brands=mp42isomavc1',
+'-metadata','comment=SAN_METHOD_FAST_REMUX',
+
+outputName
 );
 
-const url=URL.createObjectURL(blob);
+const data=ffmpeg.FS('readFile',outputName);
 
-await sleep(500);
+const blob=new Blob(
+[data.buffer],
+{type:'video/mp4'}
+);
 
 log('> [SUCCESS] Injection completed');
 log('> [OUTPUT] '+outputName);
 log('> [SYSTEM] Auto downloading...');
 
-const a=document.createElement('a');
-a.href=url;
-a.download=outputName;
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
+autoDownload(blob,outputName);
 
-downloadBtn.href=url;
-downloadBtn.download=outputName;
-downloadBtn.style.display='block';
+try{
+ffmpeg.FS('unlink',inputName);
+ffmpeg.FS('unlink',outputName);
+}catch(e){}
 
 }catch(err){
 
 log('> [FAILED] '+err.message);
+log('> [NOTE] Pastikan folder /ffmpeg/ berisi 4 file lengkap.');
+log('> [FIX] Refresh halaman lalu coba lagi.');
 
 }
 
