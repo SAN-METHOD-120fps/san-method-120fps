@@ -55,8 +55,8 @@
 
     h1 {
       font-family: 'Roboto', sans-serif;
-      font-size: 44px;
-      line-height: 46px;
+      font-size: 42px;
+      line-height: 44px;
       font-weight: 900;
       color: cyan;
       margin-bottom: 18px;
@@ -64,7 +64,7 @@
     }
 
     .sub {
-      font-size: 15px;
+      font-size: 14px;
       color: #fff;
       margin-bottom: 22px;
       letter-spacing: 2px;
@@ -82,7 +82,7 @@
       background: #000;
       text-decoration: none;
       font-family: 'Roboto', sans-serif;
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 900;
       letter-spacing: 1px;
       color: #fff;
@@ -302,31 +302,6 @@
       text-align: center;
       line-height: 1.5;
     }
-
-    @media(max-width:480px) {
-      .box {
-        padding: 26px 16px;
-      }
-
-      h1 {
-        font-size: 40px;
-        line-height: 42px;
-      }
-
-      .sub {
-        font-size: 13px;
-      }
-
-      .follow-btn,
-      .upload-btn {
-        height: 56px;
-        font-size: 19px;
-      }
-
-      .terminal-body {
-        min-height: 330px;
-      }
-    }
   </style>
 </head>
 
@@ -334,7 +309,7 @@
 
   <div class="box">
 
-    <img src="icon.png" class="pp" alt="Icon">
+    <img src="icon.png" class="pp" alt="Icon" onerror="this.style.display='none'">
 
     <h1>SAN METHOD<br>120FPS</h1>
 
@@ -396,9 +371,10 @@
 
   </div>
 
-  <script src="./ffmpeg/ffmpeg.min.js"></script>
+  <script type="module">
+    import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm";
+    import { toBlobURL, fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm";
 
-  <script>
     const videoInput = document.getElementById("videoInput");
     const fileNameText = document.getElementById("fileName");
     const injectBtn = document.getElementById("injectBtn");
@@ -411,7 +387,7 @@
     let ffmpegLoaded = false;
     let currentBlobUrl = null;
 
-    function setLang(lang) {
+    window.setLang = function(lang) {
       const text = document.getElementById("tutorialText");
 
       if (lang === "en") {
@@ -429,7 +405,7 @@
           '4. File hasil akan otomatis download<br>' +
           '5. Upload hasilnya ke TikTok';
       }
-    }
+    };
 
     function clearTerminal() {
       terminalBody.textContent = "";
@@ -471,59 +447,61 @@
       downloadBtn.style.display = "block";
       note.style.display = "block";
 
-      const tempLink = document.createElement("a");
-      tempLink.href = url;
-      tempLink.download = outputName;
-      tempLink.style.display = "none";
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = outputName;
+      a.style.display = "none";
 
-      document.body.appendChild(tempLink);
+      document.body.appendChild(a);
+      a.click();
 
-      tempLink.click();
-
-      setTimeout(function () {
-        tempLink.click();
+      setTimeout(() => {
+        a.click();
       }, 700);
 
-      setTimeout(function () {
-        document.body.removeChild(tempLink);
+      setTimeout(() => {
+        document.body.removeChild(a);
       }, 2500);
     }
 
     async function fakeTerminalStart(fileName) {
       log("> [SYSTEM] Target: " + fileName);
-      await sleep(300);
+      await sleep(250);
 
       log("> [SYSTEM] Verifying internal structure...");
-      await sleep(450);
+      await sleep(350);
 
       log("> [SYSTEM] Track signature confirmed. Extracted 2 block(s).");
-      await sleep(400);
+      await sleep(350);
 
       log("> [SYSTEM] Allocating buffer... OK");
-      await sleep(300);
+      await sleep(250);
 
       log("> [SYSTEM] Applying SAN method scale...");
-      await sleep(400);
+      await sleep(350);
 
       log("> [SYSTEM] Recompiling binary data...");
-      await sleep(400);
+      await sleep(350);
     }
 
     async function loadFFmpeg() {
       if (ffmpegLoaded) return;
 
-      if (!window.FFmpeg) {
-        throw new Error("ffmpeg.min.js tidak ditemukan. Cek folder /ffmpeg/.");
-      }
+      ffmpeg = new FFmpeg();
 
-      const createFFmpeg = window.FFmpeg.createFFmpeg;
-
-      ffmpeg = createFFmpeg({
-        log: false,
-        corePath: "./ffmpeg/ffmpeg-core.js"
+      ffmpeg.on("log", ({ message }) => {
+        if (message && message.includes("time=")) {
+          log("> [PROCESS] " + message.trim());
+        }
       });
 
-      await ffmpeg.load();
+      const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+
+      await ffmpeg.load({
+        coreURL: await toBlobURL(baseURL + "/ffmpeg-core.js", "text/javascript"),
+        wasmURL: await toBlobURL(baseURL + "/ffmpeg-core.wasm", "application/wasm"),
+        workerURL: await toBlobURL(baseURL + "/ffmpeg-core.worker.js", "text/javascript")
+      });
 
       ffmpegLoaded = true;
     }
@@ -573,7 +551,7 @@
       try {
         await fakeTerminalStart(selectedFile.name);
 
-        log("> [SYSTEM] Loading core module...");
+        log("> [SYSTEM] Loading FFmpeg core from CDN...");
         await loadFFmpeg();
         log("> [SYSTEM] Core module loaded.");
 
@@ -581,17 +559,14 @@
         const outputName = safeName(selectedFile.name) + "_SAN_METHOD.mp4";
 
         log("> [SYSTEM] Reading target data...");
-        const inputData = await window.FFmpeg.fetchFile(selectedFile);
-
-        log("> [SYSTEM] Writing temporary block...");
-        ffmpeg.FS("writeFile", inputName, inputData);
+        await ffmpeg.writeFile(inputName, await fetchFile(selectedFile));
 
         log("> [SYSTEM] Injecting SAN method...");
         log("> [SYSTEM] Stream copy enabled...");
         log("> [SYSTEM] No re-encode...");
         log("> [SYSTEM] Finalizing MP4 container...");
 
-        await ffmpeg.run(
+        await ffmpeg.exec([
           "-y",
 
           "-itsscale", "6",
@@ -612,10 +587,10 @@
           "-metadata", "comment=SAN method injected container",
 
           outputName
-        );
+        ]);
 
         log("> [SYSTEM] Extracting output block...");
-        const outputData = ffmpeg.FS("readFile", outputName);
+        const outputData = await ffmpeg.readFile(outputName);
 
         const blob = new Blob([outputData.buffer], {
           type: "video/mp4"
@@ -628,14 +603,14 @@
         forceDownload(blob, outputName);
 
         try {
-          ffmpeg.FS("unlink", inputName);
-          ffmpeg.FS("unlink", outputName);
+          await ffmpeg.deleteFile(inputName);
+          await ffmpeg.deleteFile(outputName);
         } catch (cleanupError) {}
 
       } catch (error) {
         log("> [FAILED] " + error.message);
-        log("> [NOTE] File belum dibuat, jadi tidak bisa tersimpan.");
-        log("> [FIX] Pastikan folder /ffmpeg/ berisi 4 file FFmpeg.");
+        log("> [NOTE] Proses gagal sebelum file dibuat.");
+        log("> [FIX] Refresh halaman lalu coba lagi.");
       } finally {
         injectBtn.disabled = false;
       }
