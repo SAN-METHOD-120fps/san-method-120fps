@@ -12,17 +12,21 @@
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
 }
+
 html,body{
   width:100%;
   min-height:100%;
   background:#000;
   font-family:Arial,sans-serif;
+  overflow-x:hidden;
 }
+
 body{
   display:flex;
   justify-content:center;
   padding:18px 10px;
 }
+
 .box{
   width:100%;
   max-width:430px;
@@ -32,6 +36,7 @@ body{
   padding:28px 18px;
   text-align:center;
 }
+
 .pp{
   width:110px;
   height:110px;
@@ -42,6 +47,7 @@ body{
   margin:0 auto 24px;
   background:#111;
 }
+
 h1{
   font-size:46px;
   line-height:48px;
@@ -50,6 +56,7 @@ h1{
   margin-bottom:18px;
   letter-spacing:1px;
 }
+
 .sub{
   font-size:15px;
   color:#fff;
@@ -59,7 +66,8 @@ h1{
 }
 
 /* BUTTONS */
-.follow-btn, .upload-btn{
+.follow-btn,
+.upload-btn{
   width:100%;
   height:58px;
   display:flex;
@@ -76,6 +84,8 @@ h1{
   position:relative;
   overflow:hidden;
 }
+
+/* FOLLOW RGB */
 .follow-btn::before{
   content:"";
   position:absolute;
@@ -85,10 +95,11 @@ h1{
   background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
   background-size:300% 300%;
   animation:rgbBorder 4s linear infinite;
-  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
   -webkit-mask-composite:xor;
   mask-composite:exclude;
 }
+
 .follow-btn::after{
   content:"";
   position:absolute;
@@ -97,17 +108,22 @@ h1{
   border-radius:12px;
   z-index:1;
 }
+
 .follow-btn span{
   position:relative;
   z-index:2;
 }
+
+/* UPLOAD MERAH */
 .upload-btn{
   border:2px solid red;
 }
+
 .upload-btn span{
   position:relative;
   z-index:2;
 }
+
 @keyframes rgbBorder{
   0%{background-position:0% 50%;}
   100%{background-position:300% 50%;}
@@ -127,6 +143,7 @@ h1{
   line-height:1.8;
   position:relative;
 }
+
 .translate-box{
   position:absolute;
   top:14px;
@@ -134,6 +151,7 @@ h1{
   display:flex;
   gap:8px;
 }
+
 .lang-btn{
   background:#111;
   color:#777;
@@ -144,17 +162,20 @@ h1{
   cursor:pointer;
   transition:.2s;
 }
+
 .lang-btn.active{
   background:#fff;
   color:#000;
   border-color:#fff;
 }
+
 .tutorial-title{
   color:orange;
   font-weight:900;
   font-size:28px;
   margin-bottom:28px;
 }
+
 #tutorialText{
   font-size:21px;
   line-height:1.6;
@@ -170,6 +191,7 @@ h1{
   background:#000;
   overflow:hidden;
 }
+
 .file-box{
   border:1px solid rgba(0,255,255,.7);
   border-radius:14px;
@@ -178,12 +200,14 @@ h1{
   text-align:left;
   background:#020707;
 }
+
 .file-label{
   font-size:14px;
   color:#9fffff;
   margin-bottom:10px;
   display:block;
 }
+
 input[type=file]{
   width:100%;
   background:#000;
@@ -193,6 +217,7 @@ input[type=file]{
   font-size:15px;
   color:cyan;
 }
+
 .file-name{
   margin-top:12px;
   font-size:14px;
@@ -200,6 +225,7 @@ input[type=file]{
   color:#19fff4;
   word-break:break-all;
 }
+
 .inject-btn{
   width:100%;
   border:none;
@@ -213,16 +239,19 @@ input[type=file]{
   color:#000;
   cursor:pointer;
 }
+
 .inject-btn:disabled{
   opacity:.45;
   cursor:not-allowed;
 }
+
 .terminal{
   border-radius:16px;
   overflow:hidden;
   background:#000;
   border:1px solid rgba(255,255,255,.12);
 }
+
 .terminal-header{
   height:52px;
   background:#1d1d1d;
@@ -234,14 +263,17 @@ input[type=file]{
   letter-spacing:4px;
   color:#777;
 }
+
 .dot{
   width:17px;
   height:17px;
   border-radius:50%;
 }
+
 .red{background:#ff5f56;}
 .yellow{background:#ffbd2e;}
 .green{background:#27c93f;}
+
 .terminal-body{
   min-height:320px;
   max-height:420px;
@@ -254,6 +286,7 @@ input[type=file]{
   white-space:pre-wrap;
   text-align:left;
 }
+
 .download-btn{
   display:none;
   margin-top:18px;
@@ -265,12 +298,32 @@ input[type=file]{
   font-weight:bold;
   font-size:16px;
 }
+
 @media(max-width:480px){
-  h1{font-size:42px;line-height:44px;}
-  .tutorial{font-size:18px;padding:48px 18px 22px;}
-  .tutorial-title{font-size:25px;margin-bottom:22px;}
-  #tutorialText{font-size:18px;line-height:1.7;}
-  .lang-btn{font-size:13px;padding:8px 14px;}
+  h1{
+    font-size:42px;
+    line-height:44px;
+  }
+
+  .tutorial{
+    font-size:18px;
+    padding:48px 18px 22px;
+  }
+
+  .tutorial-title{
+    font-size:25px;
+    margin-bottom:22px;
+  }
+
+  #tutorialText{
+    font-size:18px;
+    line-height:1.7;
+  }
+
+  .lang-btn{
+    font-size:13px;
+    padding:8px 14px;
+  }
 }
 </style>
 </head>
@@ -298,7 +351,9 @@ input[type=file]{
 <button id="enBtn" class="lang-btn" onclick="setLang('en')">English</button>
 <button id="idBtn" class="lang-btn active" onclick="setLang('id')">Indonesia</button>
 </div>
+
 <div class="tutorial-title">Tutorials :</div>
+
 <div id="tutorialText">
 1. Inject video kalian yang sudah di wink/hd<br><br>
 2. Pencet "Upload TikTok here"
@@ -306,13 +361,16 @@ input[type=file]{
 </div>
 
 <div class="injectwrap">
+
 <div class="file-box">
 <label class="file-label">Pilih video MP4:</label>
 <input id="videoInput" type="file" accept="video/mp4">
 <div id="fileName" class="file-name">Belum ada file dipilih.</div>
 </div>
 
-<button id="injectBtn" class="inject-btn" disabled>INJECT VIDEO</button>
+<button id="injectBtn" class="inject-btn" disabled>
+INJECT VIDEO
+</button>
 
 <div class="terminal">
 <div class="terminal-header">
@@ -321,12 +379,16 @@ input[type=file]{
 <span class="dot green"></span>
 <span>bash - core_process</span>
 </div>
+
 <div id="terminalBody" class="terminal-body">
 > Pilih video MP4 terlebih dahulu.
 </div>
 </div>
 
-<a id="downloadBtn" class="download-btn">DOWNLOAD MANUAL</a>
+<a id="downloadBtn" class="download-btn">
+DOWNLOAD MANUAL
+</a>
+
 </div>
 </div>
 
@@ -345,21 +407,25 @@ function setLang(lang){
     text.innerHTML =
       '1. Inject your video that has already been enhanced in Wink/HD<br><br>' +
       '2. Click "Upload TikTok here"';
+
     enBtn.classList.add("active");
   }else{
     text.innerHTML =
       '1. Inject video kalian yang sudah di wink/hd<br><br>' +
       '2. Pencet "Upload TikTok here"';
+
     idBtn.classList.add("active");
   }
 }
 
 const { createFFmpeg, fetchFile } = FFmpeg;
+
 const videoInput = document.getElementById('videoInput');
 const fileName = document.getElementById('fileName');
 const injectBtn = document.getElementById('injectBtn');
 const terminal = document.getElementById('terminalBody');
 const downloadBtn = document.getElementById('downloadBtn');
+
 let selectedFile = null;
 
 function log(text){
@@ -372,59 +438,116 @@ function clearTerminal(){
 }
 
 videoInput.addEventListener('change',()=>{
+
   selectedFile = videoInput.files[0];
-  if(!selectedFile){ injectBtn.disabled = true; return; }
+
+  if(!selectedFile){
+    injectBtn.disabled = true;
+    return;
+  }
+
   fileName.innerHTML = 'File: ' + selectedFile.name;
+
   injectBtn.disabled = false;
+
   clearTerminal();
+
   log('> [SYSTEM] MP4 stream confirmed');
   log('> [READY] Press INJECT VIDEO');
+
 });
 
 injectBtn.addEventListener('click', async()=>{
+
   if(!selectedFile) return;
+
   injectBtn.disabled = true;
+
   clearTerminal();
+
   try{
+
     log('> [SYSTEM] Initializing process...');
     log('> [SYSTEM] Target: ' + selectedFile.name);
     log('> [SYSTEM] Loading FFmpeg core...');
-    const ffmpeg = createFFmpeg({log:false, corePath:'./ffmpeg/ffmpeg-core.js'});
+
+    const ffmpeg = createFFmpeg({
+      log:false,
+      corePath:'./ffmpeg/ffmpeg-core.js'
+    });
+
     await ffmpeg.load();
+
     log('> [SYSTEM] FFmpeg loaded');
-    ffmpeg.FS('writeFile','input.mp4', await fetchFile(selectedFile));
+    log('> [SYSTEM] Applying YZ-style itsscale method...');
+    log('> [SYSTEM] Recompiling binary data...');
+
+    ffmpeg.FS(
+      'writeFile',
+      'input.mp4',
+      await fetchFile(selectedFile)
+    );
+
     await ffmpeg.run(
-      '-y','-i','input.mp4','-map','0',
-      '-c:v','libx265','-preset','slow','-crf','16','-pix_fmt','yuv420p',
-      '-r','60','-b:v','25M','-maxrate','40M','-bufsize','80M',
-      '-c:a','aac','-b:a','320k',
-      '-movflags','+faststart+use_metadata_tags',
-      '-video_track_timescale','90000',
-      '-metadata','major_brand=mp42',
-      '-metadata','compatible_brands=mp42isomavc1',
-      '-metadata','encoder=iPhone 15 Pro Max',
-      '-metadata','comment=SAN_METHOD_BROWSER_UPLOAD',
+      '-y',
+
+      '-itsscale','2',
+      '-i','input.mp4',
+
+      '-filter:v','fps=60',
+
+      '-c:v','libx264',
+      '-b:v','24M',
+      '-minrate','24M',
+      '-maxrate','24M',
+      '-bufsize','48M',
+      '-preset','medium',
+
+      '-c:a','copy',
+
+      '-movflags','+faststart',
+
       'output.mp4'
     );
+
     const data = ffmpeg.FS('readFile','output.mp4');
-    const blob = new Blob([data.buffer], { type:'video/mp4' });
+
+    const blob = new Blob(
+      [data.buffer],
+      { type:'video/mp4' }
+    );
+
     const url = URL.createObjectURL(blob);
+
     downloadBtn.href = url;
     downloadBtn.download = 'san method.mp4';
     downloadBtn.style.display = 'block';
+
     const a = document.createElement('a');
-    a.href = url; a.download = 'san method.mp4';
+
+    a.href = url;
+    a.download = 'san method.mp4';
+
     document.body.appendChild(a);
+
     a.click();
+
     document.body.removeChild(a);
+
     log('> [SUCCESS] Process completed');
     log('> [OUTPUT] san method.mp4');
     log('> [SYSTEM] Auto download started');
+
   }catch(err){
+
     log('> [FAILED] ' + err.message);
+
   }
+
   injectBtn.disabled = false;
+
 });
 </script>
+
 </body>
 </html>
