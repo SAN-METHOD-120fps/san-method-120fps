@@ -321,7 +321,7 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 2. Tekan INJECT VIDEO<br>
 3. Tunggu sampai proses selesai<br>
 4. File otomatis download<br>
-5. Upload hasil ke TikTok
+5. Upload hasil ke TikTok lewat browser/web upload
 </div>
 
 </div>
@@ -379,14 +379,14 @@ text.innerHTML =
 '2. Press INJECT VIDEO<br>' +
 '3. Wait until process complete<br>' +
 '4. File will auto download<br>' +
-'5. Upload result to TikTok';
+'5. Upload result to TikTok using browser/web upload';
 }else{
 text.innerHTML =
 '1. Pilih video MP4<br>' +
 '2. Tekan INJECT VIDEO<br>' +
 '3. Tunggu sampai proses selesai<br>' +
 '4. File otomatis download<br>' +
-'5. Upload hasil ke TikTok';
+'5. Upload hasil ke TikTok lewat browser/web upload';
 }
 }
 
@@ -439,7 +439,7 @@ async function loadFFmpeg(){
 if(ffmpegLoaded)return;
 
 if(!crossOriginIsolated){
-throw new Error("_headers belum aktif di Netlify. Deploy ulang dulu.");
+throw new Error("_headers belum aktif di Netlify.");
 }
 
 log('> [SYSTEM] Checking FFmpeg files...');
@@ -541,7 +541,7 @@ await sleep(350);
 log('> [SYSTEM] Recompiling binary data...');
 await sleep(350);
 
-log('> [SYSTEM] Fast remux mode enabled');
+log('> [SYSTEM] Browser upload container mode enabled');
 await sleep(350);
 
 log('> [SYSTEM] Metadata injection active');
@@ -556,16 +556,36 @@ ffmpeg.FS('writeFile',inputName,inputData);
 
 await ffmpeg.run(
 '-y',
+
+'-fflags','+genpts',
 '-i',inputName,
+
 '-map','0',
-'-c','copy',
-'-movflags','+faststart',
-'-metadata','FlyMediaPVG=PyPVG-10.0.0.2.203',
-'-metadata','encoder=Lavf61.7.100',
+'-c:v','copy',
+'-c:a','copy',
+
+'-copyts',
+'-avoid_negative_ts','make_zero',
+
+'-video_track_timescale','90000',
+
+'-movflags','+faststart+use_metadata_tags',
+'-brand','mp42',
+
 '-metadata','major_brand=mp42',
 '-metadata','minor_version=0',
-'-metadata','compatible_brands=mp42isomavc1',
-'-metadata','comment=SAN_METHOD_FAST_REMUX',
+'-metadata','compatible_brands=mp42isomavc1isom',
+'-metadata','encoder=Lavf61.7.100',
+'-metadata','FlyMediaPVG=PyPVG-10.0.0.2.203',
+'-metadata','comment=SAN_METHOD_BROWSER_UPLOAD',
+'-metadata','handler_name=Core Media Video',
+
+'-metadata:s:v:0','handler_name=Core Media Video',
+'-metadata:s:v:0','vendor_id=[0][0][0][0]',
+
+'-metadata:s:a:0','handler_name=Core Media Audio',
+'-metadata:s:a:0','vendor_id=[0][0][0][0]',
+
 outputName
 );
 
@@ -590,8 +610,8 @@ ffmpeg.FS('unlink',outputName);
 }catch(err){
 
 log('> [FAILED] '+err.message);
-log('> [NOTE] Kalau gagal di Checking FFmpeg files, berarti file FFmpeg belum kebaca dari Netlify.');
-log('> [FIX] Tunggu deploy Netlify Published lalu buka pakai ?v=99');
+log('> [NOTE] Kalau hasil tetap 576p30, berarti TikTok web masih re-encode.');
+log('> [FIX] Metode ini sudah lebih agresif, tapi no-kompres 100% tetap tergantung TikTok.');
 
 }
 
