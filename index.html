@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SAN METHOD 120FPS</title>
 
 <style>
@@ -85,7 +86,7 @@ h1{
   overflow:hidden;
 }
 
-/* FOLLOW RGB */
+/* FOLLOW TIKTOK RGB */
 .follow-btn::before{
   content:"";
   position:absolute;
@@ -114,7 +115,7 @@ h1{
   z-index:2;
 }
 
-/* UPLOAD MERAH */
+/* UPLOAD TIKTOK MERAH */
 .upload-btn{
   border:2px solid red;
 }
@@ -125,8 +126,13 @@ h1{
 }
 
 @keyframes rgbBorder{
-  0%{background-position:0% 50%;}
-  100%{background-position:300% 50%;}
+  0%{
+    background-position:0% 50%;
+  }
+
+  100%{
+    background-position:300% 50%;
+  }
 }
 
 /* TUTORIAL */
@@ -347,49 +353,52 @@ input[type=file]{
 </a>
 
 <div class="tutorial">
-<div class="translate-box">
-<button id="enBtn" class="lang-btn" onclick="setLang('en')">English</button>
-<button id="idBtn" class="lang-btn active" onclick="setLang('id')">Indonesia</button>
-</div>
 
-<div class="tutorial-title">Tutorials :</div>
+  <div class="translate-box">
+    <button id="enBtn" class="lang-btn" onclick="setLang('en')">English</button>
+    <button id="idBtn" class="lang-btn active" onclick="setLang('id')">Indonesia</button>
+  </div>
 
-<div id="tutorialText">
-1. Inject video kalian yang sudah di wink/hd<br><br>
-2. Pencet "Upload TikTok here"
-</div>
+  <div class="tutorial-title">Tutorials :</div>
+
+  <div id="tutorialText">
+    1. Inject video kalian yang sudah di wink/hd<br><br>
+    2. Pencet "Upload TikTok here"
+  </div>
+
 </div>
 
 <div class="injectwrap">
 
-<div class="file-box">
-<label class="file-label">Pilih video MP4:</label>
-<input id="videoInput" type="file" accept="video/mp4">
-<div id="fileName" class="file-name">Belum ada file dipilih.</div>
-</div>
+  <div class="file-box">
+    <label class="file-label">Pilih video MP4:</label>
+    <input id="videoInput" type="file" accept="video/mp4">
+    <div id="fileName" class="file-name">Belum ada file dipilih.</div>
+  </div>
 
-<button id="injectBtn" class="inject-btn" disabled>
-INJECT VIDEO
-</button>
+  <button id="injectBtn" class="inject-btn" disabled>
+    INJECT VIDEO
+  </button>
 
-<div class="terminal">
-<div class="terminal-header">
-<span class="dot red"></span>
-<span class="dot yellow"></span>
-<span class="dot green"></span>
-<span>bash - core_process</span>
-</div>
+  <div class="terminal">
+    <div class="terminal-header">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span>bash - core_process</span>
+    </div>
 
-<div id="terminalBody" class="terminal-body">
+    <div id="terminalBody" class="terminal-body">
 > Pilih video MP4 terlebih dahulu.
-</div>
+    </div>
+  </div>
+
+  <a id="downloadBtn" class="download-btn">
+    DOWNLOAD MANUAL
+  </a>
+
 </div>
 
-<a id="downloadBtn" class="download-btn">
-DOWNLOAD MANUAL
-</a>
-
-</div>
 </div>
 
 <script src="./ffmpeg/ffmpeg.min.js"></script>
@@ -418,8 +427,6 @@ function setLang(lang){
   }
 }
 
-const { createFFmpeg, fetchFile } = FFmpeg;
-
 const videoInput = document.getElementById('videoInput');
 const fileName = document.getElementById('fileName');
 const injectBtn = document.getElementById('injectBtn');
@@ -427,6 +434,8 @@ const terminal = document.getElementById('terminalBody');
 const downloadBtn = document.getElementById('downloadBtn');
 
 let selectedFile = null;
+let ffmpeg = null;
+let ffmpegLoaded = false;
 
 function log(text){
   terminal.textContent += text + '\n';
@@ -435,6 +444,48 @@ function log(text){
 
 function clearTerminal(){
   terminal.textContent = '';
+}
+
+async function testFile(url,name){
+  const res = await fetch(url,{cache:'no-store'});
+
+  if(!res.ok){
+    throw new Error(name + ' tidak kebaca. Status ' + res.status);
+  }
+}
+
+async function loadCore(){
+  if(ffmpegLoaded) return;
+
+  if(!window.FFmpeg){
+    throw new Error('ffmpeg.min.js belum terbaca. Refresh halaman.');
+  }
+
+  if(!crossOriginIsolated){
+    throw new Error('_headers / netlify.toml belum aktif. Tunggu Netlify Published.');
+  }
+
+  const base = window.location.origin;
+
+  log('> [SYSTEM] Checking FFmpeg files...');
+
+  await testFile(base + '/ffmpeg/ffmpeg.min.js','ffmpeg.min.js');
+  await testFile(base + '/ffmpeg/ffmpeg-core.js','ffmpeg-core.js');
+  await testFile(base + '/ffmpeg/ffmpeg-core.worker.js','ffmpeg-core.worker.js');
+  await testFile(base + '/ffmpeg/ffmpeg-core.wasm','ffmpeg-core.wasm');
+
+  const { createFFmpeg } = FFmpeg;
+
+  ffmpeg = createFFmpeg({
+    log:false,
+    corePath: base + '/ffmpeg/ffmpeg-core.js',
+    workerPath: base + '/ffmpeg/ffmpeg-core.worker.js',
+    wasmPath: base + '/ffmpeg/ffmpeg-core.wasm'
+  });
+
+  await ffmpeg.load();
+
+  ffmpegLoaded = true;
 }
 
 videoInput.addEventListener('change',()=>{
@@ -471,16 +522,13 @@ injectBtn.addEventListener('click', async()=>{
     log('> [SYSTEM] Target: ' + selectedFile.name);
     log('> [SYSTEM] Loading FFmpeg core...');
 
-    const ffmpeg = createFFmpeg({
-      log:false,
-      corePath:'./ffmpeg/ffmpeg-core.js'
-    });
-
-    await ffmpeg.load();
+    await loadCore();
 
     log('> [SYSTEM] FFmpeg loaded');
-    log('> [SYSTEM] Applying YZ-style itsscale method...');
+    log('> [SYSTEM] Applying YZ openh264-style method...');
     log('> [SYSTEM] Recompiling binary data...');
+
+    const { fetchFile } = FFmpeg;
 
     ffmpeg.FS(
       'writeFile',
@@ -494,16 +542,12 @@ injectBtn.addEventListener('click', async()=>{
       '-itsscale','2',
       '-i','input.mp4',
 
-      '-filter:v','fps=60',
-
       '-c:v','libx264',
-      '-b:v','24M',
-      '-minrate','24M',
-      '-maxrate','24M',
-      '-bufsize','48M',
-      '-preset','medium',
+      '-q:v','5',
 
-      '-c:a','copy',
+      '-c:a','aac',
+      '-b:a','128k',
+      '-ar','44100',
 
       '-movflags','+faststart',
 
@@ -529,9 +573,7 @@ injectBtn.addEventListener('click', async()=>{
     a.download = 'san method.mp4';
 
     document.body.appendChild(a);
-
     a.click();
-
     document.body.removeChild(a);
 
     log('> [SUCCESS] Process completed');
