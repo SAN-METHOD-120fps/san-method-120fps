@@ -37,7 +37,6 @@ border-radius:16px;
 padding:28px 18px;
 text-align:center;
 overflow:hidden;
-box-shadow:0 0 35px rgba(0,255,255,.3);
 }
 
 .pp{
@@ -57,7 +56,6 @@ line-height:48px;
 font-weight:900;
 color:cyan;
 margin-bottom:18px;
-text-shadow:0 0 18px rgba(0,255,255,.9);
 letter-spacing:1px;
 }
 
@@ -84,59 +82,61 @@ font-weight:900;
 letter-spacing:1px;
 color:#fff;
 margin-bottom:18px;
-position:relative;
-overflow:hidden;
-}
-
-.follow-btn::before,
-.upload-btn::before{
-content:"";
-position:absolute;
-inset:0;
-padding:2px;
-border-radius:14px;
-background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
-background-size:300% 300%;
-animation:rgbBorder 4s linear infinite;
--webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
--webkit-mask-composite:xor;
-mask-composite:exclude;
-}
-
-.follow-btn::after,
-.upload-btn::after{
-content:"";
-position:absolute;
-inset:3px;
-background:#000;
-border-radius:12px;
-z-index:1;
+border:2px solid red;
 }
 
 .follow-btn span,
 .upload-btn span{
 position:relative;
-z-index:2;
 }
 
-@keyframes rgbBorder{
-0%{background-position:0% 50%;}
-100%{background-position:300% 50%;}
-}
-
+/* TUTORIAL */
 .tutorial{
 width:100%;
 border:2px solid orange;
 border-radius:14px;
-padding:20px;
+padding:48px 20px 24px;
 margin-bottom:24px;
 background:#000;
 color:#fff;
 text-align:left;
-font-size:15px;
-line-height:28px;
+font-size:21px;
+line-height:1.8;
+position:relative;
 }
 
+.translate-box{
+position:absolute;
+top:14px;
+right:14px;
+display:flex;
+gap:8px;
+}
+
+.translate-box button{
+background:#111;
+color:#fff;
+border:1px solid #777;
+border-radius:10px;
+padding:8px 14px;
+font-size:14px;
+cursor:pointer;
+}
+
+.tutorial-title{
+color:orange;
+font-weight:900;
+font-size:28px;
+margin-bottom:28px;
+}
+
+#tutorialText{
+font-size:21px;
+line-height:1.9;
+color:#fff;
+}
+
+/* INJECT */
 .injectwrap{
 width:100%;
 padding:12px;
@@ -144,7 +144,6 @@ border:2px solid cyan;
 border-radius:16px;
 background:#000;
 overflow:hidden;
-box-shadow:0 0 25px rgba(0,255,255,.3);
 }
 
 .file-box{
@@ -192,14 +191,12 @@ font-size:22px;
 font-weight:900;
 letter-spacing:8px;
 color:#000;
-box-shadow:0 0 42px rgba(18,217,213,.9);
 cursor:pointer;
 }
 
 .inject-btn:disabled{
 opacity:.45;
 cursor:not-allowed;
-box-shadow:none;
 }
 
 .terminal{
@@ -240,7 +237,6 @@ font-size:14px;
 line-height:1.8;
 font-family:"Courier New",monospace;
 color:#27ff4a;
-text-shadow:0 0 8px rgba(39,255,74,.7);
 white-space:pre-wrap;
 text-align:left;
 }
@@ -255,7 +251,33 @@ text-decoration:none;
 color:cyan;
 font-weight:bold;
 font-size:16px;
-box-shadow:0 0 20px rgba(0,255,255,.3);
+}
+
+@media(max-width:480px){
+h1{
+font-size:42px;
+line-height:44px;
+}
+
+.tutorial{
+font-size:18px;
+padding:48px 18px 22px;
+}
+
+.tutorial-title{
+font-size:25px;
+margin-bottom:22px;
+}
+
+#tutorialText{
+font-size:18px;
+line-height:1.9;
+}
+
+.translate-box button{
+font-size:13px;
+padding:7px 12px;
+}
 }
 </style>
 </head>
@@ -279,11 +301,19 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 </a>
 
 <div class="tutorial">
-1. Pilih video MP4<br>
-2. Tekan INJECT VIDEO<br>
-3. Tunggu proses selesai<br>
-4. File otomatis download<br>
-5. Upload hasil lewat web TikTok desktop mode
+
+<div class="translate-box">
+<button onclick="setLang('en')">English</button>
+<button onclick="setLang('id')">Indonesia</button>
+</div>
+
+<div class="tutorial-title">Tutorials :</div>
+
+<div id="tutorialText">
+1. Inject video kalian yang sudah di wink/hd<br>
+2. Pencet "Upload TikTok here"
+</div>
+
 </div>
 
 <div class="injectwrap">
@@ -321,6 +351,21 @@ DOWNLOAD MANUAL
 <script src="./ffmpeg/ffmpeg.min.js"></script>
 
 <script>
+function setLang(lang){
+const text = document.getElementById("tutorialText");
+
+if(lang === "en"){
+text.innerHTML =
+'1. Inject your video that has already been<br>' +
+'enhanced in Wink/HD<br>' +
+'2. Click "Upload TikTok here"';
+}else{
+text.innerHTML =
+'1. Inject video kalian yang sudah di wink/hd<br>' +
+'2. Pencet "Upload TikTok here"';
+}
+}
+
 const { createFFmpeg, fetchFile } = FFmpeg;
 
 const videoInput = document.getElementById('videoInput');
@@ -332,7 +377,7 @@ const downloadBtn = document.getElementById('downloadBtn');
 let selectedFile = null;
 
 function log(text){
-terminal.textContent += text + '\\n';
+terminal.textContent += text + '\n';
 terminal.scrollTop = terminal.scrollHeight;
 }
 
