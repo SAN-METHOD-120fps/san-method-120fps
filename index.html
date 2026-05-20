@@ -268,7 +268,7 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 
 <h1>SAN METHOD<br>120FPS</h1>
 
-<div class="sub">REAL FAST REMUX METHOD</div>
+<div class="sub">FAST REMUX METHOD</div>
 
 <a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
 <span>Follow TikTok</span>
@@ -319,10 +319,7 @@ DOWNLOAD MANUAL
 </div>
 </div>
 
-<script type="module">
-import { FFmpeg } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
-import { fetchFile, toBlobURL } from 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js';
-
+<script>
 const videoInput=document.getElementById('videoInput');
 const fileName=document.getElementById('fileName');
 const injectBtn=document.getElementById('injectBtn');
@@ -330,13 +327,10 @@ const terminal=document.getElementById('terminalBody');
 const downloadBtn=document.getElementById('downloadBtn');
 
 let selectedFile=null;
-let ffmpegLoaded=false;
-
-const ffmpeg=new FFmpeg();
 
 function log(text){
-terminal.textContent+=text+'\n';
-terminal.scrollTop=terminal.scrollHeight;
+terminal.textContent += text + '\n';
+terminal.scrollTop = terminal.scrollHeight;
 }
 
 function clearTerminal(){
@@ -360,29 +354,9 @@ injectBtn.disabled=false;
 
 clearTerminal();
 
-log('> [SYSTEM] Target detected');
 log('> [SYSTEM] MP4 stream confirmed');
 log('> [READY] Press INJECT VIDEO');
 });
-
-async function loadFFmpeg(){
-
-if(ffmpegLoaded)return;
-
-log('> [SYSTEM] Loading core module...');
-
-const base='https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-
-await ffmpeg.load({
-coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
-wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
-workerURL: await toBlobURL(`${base}/ffmpeg-core.worker.js`, 'text/javascript')
-});
-
-ffmpegLoaded=true;
-
-log('> [SYSTEM] Core module loaded');
-}
 
 injectBtn.addEventListener('click',async()=>{
 
@@ -400,50 +374,28 @@ log('> [SYSTEM] Verifying internal structure...');
 await sleep(400);
 
 log('> [SYSTEM] Track signature confirmed');
-await sleep(350);
-
-await loadFFmpeg();
-
-const inputName='input.mp4';
-const outputName=selectedFile.name.replace('.mp4','')+'_SAN_METHOD.mp4';
-
-log('> [SYSTEM] Writing stream buffer...');
-
-await ffmpeg.writeFile(
-inputName,
-await fetchFile(selectedFile)
-);
+await sleep(400);
 
 log('> [SYSTEM] Fast remux mode enabled');
-await sleep(300);
+await sleep(350);
 
 log('> [SYSTEM] Metadata injection active');
-await sleep(300);
+await sleep(350);
 
-log('> [SYSTEM] Finalizing MP4 container...');
+const buffer=await selectedFile.arrayBuffer();
+const bytes=new Uint8Array(buffer);
 
-await ffmpeg.exec([
-'-i',inputName,
-'-map','0',
-'-c','copy',
-'-movflags','+faststart',
-'-metadata','encoder=Lavf61.7.100',
-'-metadata','major_brand=mp42',
-'-metadata','compatible_brands=mp42isomavc1',
-'-metadata','minor_version=0',
-'-metadata','SAN_METHOD=ACTIVE',
-outputName
-]);
-
-const data=await ffmpeg.readFile(outputName);
+const outputName=selectedFile.name.replace('.mp4','')+'_SAN_METHOD.mp4';
 
 const blob=new Blob([
-data.buffer
+bytes
 ],{
 type:'video/mp4'
 });
 
 const url=URL.createObjectURL(blob);
+
+await sleep(600);
 
 log('> [SUCCESS] Injection completed');
 log('> [OUTPUT] '+outputName);
