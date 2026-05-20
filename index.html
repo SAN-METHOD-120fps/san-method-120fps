@@ -6,8 +6,6 @@
 
 <title>SAN METHOD 120FPS</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-
 <style>
 *{
 margin:0;
@@ -54,13 +52,13 @@ background:#111;
 }
 
 h1{
-font-family:'Roboto',sans-serif;
 font-size:46px;
 line-height:48px;
 font-weight:900;
 color:cyan;
 margin-bottom:18px;
 text-shadow:0 0 18px rgba(0,255,255,.9);
+letter-spacing:1px;
 }
 
 .sub{
@@ -81,7 +79,6 @@ justify-content:center;
 border-radius:14px;
 background:#000;
 text-decoration:none;
-font-family:'Roboto',sans-serif;
 font-size:21px;
 font-weight:900;
 letter-spacing:1px;
@@ -359,7 +356,7 @@ DOWNLOAD MANUAL
 </div>
 </div>
 
-<script src="https://san-method-120fps.github.io/san-method-120fps/ffmpeg/ffmpeg.min.js"></script>
+<script src="./ffmpeg/ffmpeg.min.js"></script>
 
 <script>
 const videoInput=document.getElementById('videoInput');
@@ -420,6 +417,10 @@ downloadBtn.removeAttribute('download');
 async function loadFFmpeg(){
 if(ffmpegLoaded)return;
 
+if(!crossOriginIsolated){
+throw new Error("SharedArrayBuffer belum aktif. File _headers belum terbaca Netlify.");
+}
+
 if(!window.FFmpeg){
 throw new Error("ffmpeg.min.js tidak terbaca.");
 }
@@ -428,7 +429,7 @@ const createFFmpeg=window.FFmpeg.createFFmpeg;
 
 ffmpeg=createFFmpeg({
 log:false,
-corePath:"https://san-method-120fps.github.io/san-method-120fps/ffmpeg/ffmpeg-core.js"
+corePath:"./ffmpeg/ffmpeg-core.js"
 });
 
 await ffmpeg.load();
@@ -531,21 +532,16 @@ ffmpeg.FS('writeFile',inputName,inputData);
 
 await ffmpeg.run(
 '-y',
-
 '-i',inputName,
-
 '-map','0',
 '-c','copy',
-
 '-movflags','+faststart',
-
 '-metadata','FlyMediaPVG=PyPVG-10.0.0.2.203',
 '-metadata','encoder=Lavf61.7.100',
 '-metadata','major_brand=mp42',
 '-metadata','minor_version=0',
 '-metadata','compatible_brands=mp42isomavc1',
 '-metadata','comment=SAN_METHOD_FAST_REMUX',
-
 outputName
 );
 
@@ -570,8 +566,8 @@ ffmpeg.FS('unlink',outputName);
 }catch(err){
 
 log('> [FAILED] '+err.message);
-log('> [NOTE] Kalau masih gagal, refresh halaman dan coba video lebih kecil.');
-log('> [FIX] Pastikan 4 file FFmpeg bisa dibuka lewat GitHub Pages.');
+log('> [NOTE] Edit di GitHub, lalu tunggu Netlify deploy sampai Published.');
+log('> [FIX] Pastikan file _headers ada di root repo.');
 
 }
 
