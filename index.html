@@ -86,7 +86,7 @@ h1{
   overflow:hidden;
 }
 
-/* FOLLOW TIKTOK RGB */
+/* FOLLOW RGB */
 .follow-btn::before{
   content:"";
   position:absolute;
@@ -115,7 +115,7 @@ h1{
   z-index:2;
 }
 
-/* UPLOAD TIKTOK MERAH */
+/* UPLOAD MERAH */
 .upload-btn{
   border:2px solid red;
 }
@@ -129,7 +129,6 @@ h1{
   0%{
     background-position:0% 50%;
   }
-
   100%{
     background-position:300% 50%;
   }
@@ -536,14 +535,21 @@ injectBtn.addEventListener('click', async()=>{
       await fetchFile(selectedFile)
     );
 
+    try{
+      ffmpeg.FS('unlink','output.mp4');
+    }catch(e){}
+
     await ffmpeg.run(
       '-y',
 
       '-itsscale','2',
       '-i','input.mp4',
 
+      '-r','60',
+
       '-c:v','libx264',
-      '-q:v','5',
+      '-preset','medium',
+      '-crf','18',
 
       '-c:a','aac',
       '-b:a','128k',
@@ -554,7 +560,13 @@ injectBtn.addEventListener('click', async()=>{
       'output.mp4'
     );
 
-    const data = ffmpeg.FS('readFile','output.mp4');
+    let data;
+
+    try{
+      data = ffmpeg.FS('readFile','output.mp4');
+    }catch(e){
+      throw new Error('Output gagal dibuat. Coba video lebih kecil atau refresh halaman.');
+    }
 
     const blob = new Blob(
       [data.buffer],
