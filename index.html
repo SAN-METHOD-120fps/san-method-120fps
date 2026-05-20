@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SAN METHOD 120FPS</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
@@ -19,8 +20,8 @@ html,body{
 width:100%;
 min-height:100%;
 background:#000;
-font-family:Arial,sans-serif;
 overflow-x:hidden;
+font-family:Arial,sans-serif;
 }
 
 body{
@@ -34,10 +35,11 @@ width:100%;
 max-width:430px;
 background:#050505;
 border:2px solid cyan;
-border-radius:18px;
-padding:26px 16px;
+border-radius:16px;
+padding:28px 18px;
 text-align:center;
-box-shadow:0 0 30px rgba(0,255,255,.25);
+overflow:hidden;
+box-shadow:0 0 35px rgba(0,255,255,.3);
 }
 
 .pp{
@@ -46,27 +48,27 @@ height:110px;
 border-radius:50%;
 object-fit:cover;
 border:4px solid cyan;
-margin:auto;
 display:block;
-margin-bottom:22px;
+margin:0 auto 24px;
 background:#111;
 }
 
 h1{
 font-family:'Roboto',sans-serif;
-font-size:42px;
-line-height:45px;
+font-size:46px;
+line-height:48px;
 font-weight:900;
 color:cyan;
-text-shadow:0 0 18px rgba(0,255,255,.8);
-margin-bottom:14px;
+margin-bottom:18px;
+text-shadow:0 0 18px rgba(0,255,255,.9);
 }
 
 .sub{
-font-size:14px;
-letter-spacing:2px;
+font-size:15px;
 color:#fff;
-margin-bottom:20px;
+margin-bottom:22px;
+letter-spacing:2px;
+opacity:.9;
 }
 
 .follow-btn,
@@ -76,16 +78,17 @@ height:58px;
 display:flex;
 align-items:center;
 justify-content:center;
+border-radius:14px;
+background:#000;
 text-decoration:none;
 font-family:'Roboto',sans-serif;
-font-size:20px;
+font-size:21px;
 font-weight:900;
-border-radius:14px;
-margin-bottom:16px;
+letter-spacing:1px;
+color:#fff;
+margin-bottom:18px;
 position:relative;
 overflow:hidden;
-color:#fff;
-background:#000;
 }
 
 .follow-btn::before{
@@ -96,7 +99,7 @@ padding:2px;
 border-radius:14px;
 background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
 background-size:300% 300%;
-animation:rgb 4s linear infinite;
+animation:rgbBorder 4s linear infinite;
 -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
 -webkit-mask-composite:xor;
 mask-composite:exclude;
@@ -119,147 +122,140 @@ z-index:2;
 
 .upload-btn{
 border:2px solid red;
+margin-bottom:22px;
 }
 
-@keyframes rgb{
+@keyframes rgbBorder{
 0%{background-position:0% 50%;}
 100%{background-position:300% 50%;}
 }
 
 .tutorial{
-margin-top:8px;
+width:100%;
 border:2px solid orange;
 border-radius:14px;
-padding:16px;
-margin-bottom:22px;
+padding:48px 14px 16px;
+margin-bottom:24px;
 background:#000;
-text-align:left;
 color:#fff;
-line-height:28px;
+text-align:left;
 font-size:15px;
+line-height:27px;
+position:relative;
+}
+
+.translate-box{
+position:absolute;
+top:10px;
+right:10px;
+display:flex;
+gap:6px;
+}
+
+.translate-box button{
+background:#111;
+color:#fff;
+border:1px solid #777;
+border-radius:7px;
+padding:6px 9px;
+font-size:11px;
+cursor:pointer;
+}
+
+.tutorial-title{
+color:orange;
+font-weight:bold;
+font-size:18px;
+margin-bottom:10px;
 }
 
 .injectwrap{
 width:100%;
-border:2px solid cyan;
-border-radius:18px;
-padding:14px;
-background:#000;
-box-shadow:0 0 20px rgba(0,255,255,.25);
-}
-
-.file-box{
-border:1px solid rgba(0,255,255,.7);
-border-radius:14px;
-padding:16px;
-margin-bottom:24px;
-text-align:left;
-background:#020707;
-}
-
-.file-label{
-font-size:14px;
-color:#9fffff;
-margin-bottom:10px;
-display:block;
-}
-
-input[type=file]{
-width:100%;
-background:#000;
-border:1px solid rgba(0,255,255,.4);
-border-radius:10px;
 padding:12px;
-font-size:15px;
-color:cyan;
-}
-
-.file-name{
-margin-top:12px;
-font-size:14px;
-line-height:1.5;
-color:#19fff4;
-word-break:break-all;
-}
-
-.inject-btn{
-width:100%;
-border:none;
-border-radius:14px;
-padding:24px 10px;
-margin-bottom:28px;
-background:#23d3d3;
-font-size:22px;
-font-weight:900;
-letter-spacing:8px;
-color:#000;
-box-shadow:0 0 42px rgba(18,217,213,.9);
-cursor:pointer;
-}
-
-.inject-btn:disabled{
-opacity:.45;
-cursor:not-allowed;
-box-shadow:none;
-}
-
-.terminal{
+border:2px solid cyan;
 border-radius:16px;
-overflow:hidden;
 background:#000;
-border:1px solid rgba(255,255,255,.12);
+overflow:hidden;
+box-shadow:0 0 25px rgba(0,255,255,.3);
 }
 
-.terminal-header{
-height:52px;
-background:#1d1d1d;
-display:flex;
-align-items:center;
-gap:10px;
-padding:0 18px;
-font-size:14px;
+.inject-title{
+color:cyan;
+font-size:20px;
+font-weight:900;
 letter-spacing:4px;
-color:#777;
+margin-bottom:14px;
+text-shadow:0 0 14px cyan;
 }
 
-.dot{
-width:17px;
-height:17px;
-border-radius:50%;
+.injectbox{
+width:100%;
+height:720px;
+overflow:hidden;
+position:relative;
+background:#000;
+border-radius:12px;
+border:1px solid rgba(0,255,255,.45);
 }
 
-.red{background:#ff5f56;}
-.yellow{background:#ffbd2e;}
-.green{background:#27c93f;}
+.injectbox iframe{
+position:absolute;
+top:-80px;
+left:-14px;
+width:112%;
+height:900px;
+border:none;
+display:block;
+background:#000;
+}
 
-.terminal-body{
-min-height:320px;
-max-height:420px;
-overflow-y:auto;
-padding:20px;
-font-size:14px;
-line-height:1.8;
-font-family:"Courier New",monospace;
-color:#27ff4a;
-text-shadow:0 0 8px rgba(39,255,74,.7);
-white-space:pre-wrap;
+.note{
+font-size:13px;
+line-height:22px;
+color:#9fffff;
+margin-top:14px;
 text-align:left;
 }
 
-.download-btn{
-display:none;
-margin-top:18px;
-padding:16px;
-border:2px solid cyan;
-border-radius:14px;
-text-decoration:none;
-color:cyan;
-font-weight:bold;
-font-size:16px;
-box-shadow:0 0 20px rgba(0,255,255,.3);
+@media(max-width:480px){
+.box{
+padding:26px 16px;
+}
+
+.pp{
+width:100px;
+height:100px;
+}
+
+h1{
+font-size:40px;
+line-height:42px;
+}
+
+.sub{
+font-size:13px;
+}
+
+.follow-btn,
+.upload-btn{
+height:56px;
+font-size:19px;
+}
+
+.injectbox{
+height:720px;
+}
+
+.injectbox iframe{
+top:-80px;
+left:-14px;
+width:112%;
+height:900px;
+}
 }
 </style>
 </head>
+
 <body>
 
 <div class="box">
@@ -268,7 +264,7 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 
 <h1>SAN METHOD<br>120FPS</h1>
 
-<div class="sub">FAST REMUX METHOD</div>
+<div class="sub">NO KOMPRES TIKTOK METHOD</div>
 
 <a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
 <span>Follow TikTok</span>
@@ -279,148 +275,61 @@ box-shadow:0 0 20px rgba(0,255,255,.3);
 </a>
 
 <div class="tutorial">
-<b>Tutorial :</b><br><br>
-1. Pilih video MP4<br>
-2. Tekan INJECT VIDEO<br>
-3. Tunggu proses selesai<br>
-4. File otomatis download<br>
-5. Upload hasil ke TikTok
+
+<div class="translate-box">
+<button onclick="setLang('en')">English</button>
+<button onclick="setLang('id')">Indonesia</button>
+</div>
+
+<div class="tutorial-title" id="tutorialTitle">Tutorials :</div>
+
+<div id="tutorialText">
+1. Inject video kalian di tool bawah<br>
+2. Tunggu sampai file hasil otomatis download<br>
+3. Setelah selesai, tekan Upload TikTok here<br>
+4. Upload file hasil inject ke TikTok
+</div>
+
 </div>
 
 <div class="injectwrap">
 
-<div class="file-box">
-<label class="file-label">Pilih video MP4:</label>
-<input id="videoInput" type="file" accept="video/mp4,.mp4">
-<div id="fileName" class="file-name">Belum ada file dipilih.</div>
+<div class="inject-title">INJECT TOOL</div>
+
+<div class="injectbox">
+<iframe
+src="https://yz-tiktok-tool.neocities.org/yztoolv2"
+allow="clipboard-read; clipboard-write; fullscreen; downloads"
+scrolling="yes">
+</iframe>
 </div>
 
-<button id="injectBtn" class="inject-btn" disabled>
-INJECT VIDEO
-</button>
-
-<div class="terminal">
-<div class="terminal-header">
-<span class="dot red"></span>
-<span class="dot yellow"></span>
-<span class="dot green"></span>
-<span>bash - core_process</span>
+<div class="note">
+Catatan: bagian inject memakai engine tool yang sama seperti YZ agar hasilnya mendekati metode YZ. Kalau tombol download muncul dari dalam box, tekan dan simpan file hasilnya.
 </div>
 
-<div id="terminalBody" class="terminal-body">
-> Pilih video MP4 terlebih dahulu.
-</div>
 </div>
 
-<a id="downloadBtn" class="download-btn">
-DOWNLOAD MANUAL
-</a>
-
-</div>
 </div>
 
 <script>
-const videoInput=document.getElementById('videoInput');
-const fileName=document.getElementById('fileName');
-const injectBtn=document.getElementById('injectBtn');
-const terminal=document.getElementById('terminalBody');
-const downloadBtn=document.getElementById('downloadBtn');
+function setLang(lang){
+const text=document.getElementById("tutorialText");
 
-let selectedFile=null;
-
-function log(text){
-terminal.textContent += text + '\n';
-terminal.scrollTop = terminal.scrollHeight;
+if(lang==="en"){
+text.innerHTML =
+'1. Inject your video using the tool below<br>' +
+'2. Wait until the result file downloads automatically<br>' +
+'3. After finished, press Upload TikTok here<br>' +
+'4. Upload the injected result to TikTok';
+}else{
+text.innerHTML =
+'1. Inject video kalian di tool bawah<br>' +
+'2. Tunggu sampai file hasil otomatis download<br>' +
+'3. Setelah selesai, tekan Upload TikTok here<br>' +
+'4. Upload file hasil inject ke TikTok';
 }
-
-function clearTerminal(){
-terminal.textContent='';
 }
-
-function sleep(ms){
-return new Promise(resolve=>setTimeout(resolve,ms));
-}
-
-videoInput.addEventListener('change',()=>{
-selectedFile=videoInput.files[0];
-
-if(!selectedFile){
-injectBtn.disabled=true;
-return;
-}
-
-fileName.innerHTML='File: '+selectedFile.name;
-injectBtn.disabled=false;
-
-clearTerminal();
-
-log('> [SYSTEM] MP4 stream confirmed');
-log('> [READY] Press INJECT VIDEO');
-});
-
-injectBtn.addEventListener('click',async()=>{
-
-if(!selectedFile)return;
-
-injectBtn.disabled=true;
-clearTerminal();
-
-try{
-
-log('> [SYSTEM] Target: '+selectedFile.name);
-await sleep(300);
-
-log('> [SYSTEM] Verifying internal structure...');
-await sleep(400);
-
-log('> [SYSTEM] Track signature confirmed');
-await sleep(400);
-
-log('> [SYSTEM] Fast remux mode enabled');
-await sleep(350);
-
-log('> [SYSTEM] Metadata injection active');
-await sleep(350);
-
-const buffer=await selectedFile.arrayBuffer();
-const bytes=new Uint8Array(buffer);
-
-const outputName=selectedFile.name.replace('.mp4','')+'_SAN_METHOD.mp4';
-
-const blob=new Blob([
-bytes
-],{
-type:'video/mp4'
-});
-
-const url=URL.createObjectURL(blob);
-
-await sleep(600);
-
-log('> [SUCCESS] Injection completed');
-log('> [OUTPUT] '+outputName);
-log('> [SYSTEM] Auto downloading...');
-
-const a=document.createElement('a');
-a.href=url;
-a.download=outputName;
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-
-downloadBtn.href=url;
-downloadBtn.download=outputName;
-downloadBtn.style.display='block';
-
-}catch(err){
-
-log('> [FAILED] '+err.message);
-
-}
-
-injectBtn.disabled=false;
-
-});
 </script>
 
 </body>
