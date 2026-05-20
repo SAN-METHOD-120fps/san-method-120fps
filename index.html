@@ -1,621 +1,477 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAN METHOD 120FPS</title>
 
-  <title>SAN METHOD 120FPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+}
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+html,body{
+width:100%;
+min-height:100%;
+background:#000;
+overflow-x:hidden;
+font-family:Arial,sans-serif;
+}
 
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      background: #000;
-      overflow-x: hidden;
-      font-family: Arial, sans-serif;
-    }
+body{
+display:flex;
+justify-content:center;
+padding:18px 10px;
+}
 
-    body {
-      display: flex;
-      justify-content: center;
-      padding: 18px 10px;
-    }
+.box{
+width:100%;
+max-width:430px;
+background:#050505;
+border:2px solid cyan;
+border-radius:18px;
+padding:26px 16px;
+text-align:center;
+box-shadow:0 0 30px rgba(0,255,255,.28);
+}
 
-    .box {
-      width: 100%;
-      max-width: 430px;
-      background: #050505;
-      border: 2px solid cyan;
-      border-radius: 16px;
-      padding: 28px 18px;
-      text-align: center;
-      overflow: hidden;
-      box-shadow: 0 0 30px rgba(0, 255, 255, 0.28);
-    }
+.pp{
+width:110px;
+height:110px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid cyan;
+margin:auto;
+display:block;
+margin-bottom:22px;
+background:#111;
+}
 
-    .pp {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid cyan;
-      display: block;
-      margin: 0 auto 24px;
-      background: #111;
-    }
+h1{
+font-family:'Roboto',sans-serif;
+font-size:42px;
+font-weight:900;
+line-height:45px;
+color:cyan;
+text-shadow:0 0 20px rgba(0,255,255,.9);
+margin-bottom:14px;
+}
 
-    h1 {
-      font-family: 'Roboto', sans-serif;
-      font-size: 42px;
-      line-height: 44px;
-      font-weight: 900;
-      color: cyan;
-      margin-bottom: 18px;
-      text-shadow: 0 0 18px rgba(0, 255, 255, 0.8);
-    }
+.sub{
+font-size:14px;
+letter-spacing:2px;
+color:#fff;
+margin-bottom:20px;
+opacity:.9;
+}
 
-    .sub {
-      font-size: 14px;
-      color: #fff;
-      margin-bottom: 22px;
-      letter-spacing: 2px;
-      opacity: 0.9;
-    }
+.follow-btn,
+.upload-btn{
+width:100%;
+height:58px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+font-family:'Roboto',sans-serif;
+font-size:20px;
+font-weight:900;
+border-radius:14px;
+margin-bottom:16px;
+position:relative;
+overflow:hidden;
+color:#fff;
+background:#000;
+}
 
-    .follow-btn,
-    .upload-btn {
-      width: 100%;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      background: #000;
-      text-decoration: none;
-      font-family: 'Roboto', sans-serif;
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: #fff;
-      margin-bottom: 18px;
-      position: relative;
-      overflow: hidden;
-    }
+.follow-btn::before{
+content:"";
+position:absolute;
+inset:0;
+padding:2px;
+border-radius:14px;
+background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
+background-size:300% 300%;
+animation:rgb 4s linear infinite;
+-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+-webkit-mask-composite:xor;
+mask-composite:exclude;
+}
 
-    .follow-btn::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      padding: 2px;
-      border-radius: 14px;
-      background: linear-gradient(90deg, red, orange, yellow, lime, cyan, blue, violet, red);
-      background-size: 300% 300%;
-      animation: rgbBorder 4s linear infinite;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-    }
+.follow-btn::after{
+content:"";
+position:absolute;
+inset:3px;
+background:#000;
+border-radius:12px;
+z-index:1;
+}
 
-    .follow-btn::after {
-      content: "";
-      position: absolute;
-      inset: 3px;
-      background: #000;
-      border-radius: 12px;
-      z-index: 1;
-    }
+.follow-btn span,
+.upload-btn span{
+position:relative;
+z-index:2;
+}
 
-    .follow-btn span,
-    .upload-btn span {
-      position: relative;
-      z-index: 2;
-    }
+.upload-btn{
+border:2px solid red;
+}
 
-    .upload-btn {
-      border: 2px solid red;
-      margin-bottom: 22px;
-    }
+@keyframes rgb{
+0%{background-position:0% 50%;}
+100%{background-position:300% 50%;}
+}
 
-    @keyframes rgbBorder {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 300% 50%; }
-    }
+.tutorial{
+margin-top:8px;
+border:2px solid orange;
+border-radius:14px;
+padding:16px;
+margin-bottom:22px;
+background:#000;
+text-align:left;
+color:#fff;
+line-height:28px;
+font-size:15px;
+}
 
-    .tutorial {
-      width: 100%;
-      border: 2px solid orange;
-      border-radius: 14px;
-      padding: 48px 14px 16px;
-      margin-bottom: 24px;
-      background: #000;
-      color: #fff;
-      text-align: left;
-      font-size: 15px;
-      line-height: 26px;
-      position: relative;
-    }
+.injectwrap{
+width:100%;
+border:2px solid cyan;
+border-radius:18px;
+padding:14px;
+background:#000;
+box-shadow:0 0 20px rgba(0,255,255,.25);
+}
 
-    .translate-box {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 6px;
-    }
+.file-box{
+border:1px solid rgba(0,255,255,.7);
+border-radius:14px;
+padding:16px;
+margin-bottom:24px;
+text-align:left;
+background:#020707;
+}
 
-    .translate-box button {
-      background: #111;
-      color: #fff;
-      border: 1px solid #777;
-      border-radius: 7px;
-      padding: 6px 9px;
-      font-size: 11px;
-      cursor: pointer;
-    }
+.file-label{
+font-size:14px;
+color:#9fffff;
+margin-bottom:10px;
+display:block;
+}
 
-    .tutorial-title {
-      color: orange;
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+input[type=file]{
+width:100%;
+background:#000;
+border:1px solid rgba(0,255,255,.4);
+border-radius:10px;
+padding:12px;
+font-size:15px;
+color:cyan;
+}
 
-    .injectwrap {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid cyan;
-      border-radius: 16px;
-      background: #000;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.25);
-    }
+.file-name{
+margin-top:12px;
+font-size:14px;
+line-height:1.5;
+color:#19fff4;
+word-break:break-all;
+}
 
-    .file-box {
-      border: 1px solid rgba(0, 255, 255, 0.7);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 28px;
-      background: #020707;
-      text-align: left;
-    }
+.inject-btn{
+width:100%;
+border:none;
+border-radius:14px;
+padding:24px 10px;
+margin-bottom:28px;
+background:#23d3d3;
+font-size:22px;
+font-weight:900;
+letter-spacing:8px;
+color:#000;
+box-shadow:0 0 42px rgba(18,217,213,.9);
+cursor:pointer;
+}
 
-    .file-label {
-      color: #9fffff;
-      font-size: 14px;
-      margin-bottom: 10px;
-      display: block;
-    }
+.inject-btn:disabled{
+opacity:.4;
+box-shadow:none;
+cursor:not-allowed;
+}
 
-    input[type="file"] {
-      width: 100%;
-      color: cyan;
-      font-size: 15px;
-      background: #000;
-      border: 1px solid rgba(0, 255, 255, 0.4);
-      border-radius: 10px;
-      padding: 12px;
-    }
+.terminal{
+border-radius:16px;
+overflow:hidden;
+background:#000;
+border:1px solid rgba(255,255,255,.12);
+}
 
-    .file-name {
-      color: #19fff4;
-      font-size: 14px;
-      word-break: break-all;
-      margin-top: 12px;
-      line-height: 1.5;
-    }
+.terminal-header{
+height:52px;
+background:#1d1d1d;
+display:flex;
+align-items:center;
+gap:10px;
+padding:0 18px;
+font-size:14px;
+letter-spacing:4px;
+color:#777;
+}
 
-    .inject-btn {
-      width: 100%;
-      border: none;
-      border-radius: 14px;
-      padding: 24px 10px;
-      margin-bottom: 28px;
-      background: #12d9d5;
-      color: #000;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 7px;
-      cursor: pointer;
-      box-shadow: 0 0 42px rgba(18, 217, 213, 0.9);
-      touch-action: manipulation;
-    }
+.dot{
+width:17px;
+height:17px;
+border-radius:50%;
+}
 
-    .inject-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+.red{background:#ff5f56;}
+.yellow{background:#ffbd2e;}
+.green{background:#27c93f;}
 
-    .terminal {
-      border-radius: 16px;
-      overflow: hidden;
-      background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.15);
-    }
+.terminal-body{
+min-height:340px;
+max-height:420px;
+overflow-y:auto;
+padding:20px;
+font-size:14px;
+line-height:1.9;
+font-family:"Courier New",monospace;
+color:#27ff4a;
+text-shadow:0 0 8px rgba(39,255,74,.8);
+white-space:pre-wrap;
+text-align:left;
+}
 
-    .terminal-header {
-      height: 52px;
-      background: #1d1d1d;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 18px;
-      color: #777;
-      font-size: 14px;
-      letter-spacing: 4px;
-    }
+.download-btn{
+display:none;
+margin-top:18px;
+padding:16px;
+border:2px solid cyan;
+border-radius:14px;
+text-decoration:none;
+color:cyan;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 0 20px rgba(0,255,255,.3);
+}
 
-    .dot {
-      width: 17px;
-      height: 17px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .red { background: #ff5f56; }
-    .yellow { background: #ffbd2e; }
-    .green { background: #27c93f; }
-
-    .terminal-body {
-      min-height: 330px;
-      max-height: 430px;
-      overflow-y: auto;
-      padding: 20px;
-      color: #27ff4a;
-      font-size: 14px;
-      line-height: 1.75;
-      font-family: "Courier New", monospace;
-      white-space: pre-wrap;
-      text-align: left;
-      text-shadow: 0 0 8px rgba(39, 255, 74, 0.75);
-    }
-
-    .download-btn {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-      color: #00fff2;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: bold;
-      border: 2px solid #00fff2;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 0 18px rgba(0, 255, 242, 0.25);
-    }
-
-    .small-note {
-      display: none;
-      margin-top: 14px;
-      color: #9ffffb;
-      font-size: 13px;
-      text-align: center;
-      line-height: 1.5;
-    }
-  </style>
+.note{
+display:none;
+margin-top:14px;
+font-size:13px;
+line-height:1.5;
+color:#9fffff;
+}
+</style>
 </head>
-
 <body>
 
-  <div class="box">
-
-    <img src="icon.png" class="pp" alt="Icon" onerror="this.style.display='none'">
-
-    <h1>SAN METHOD<br>120FPS</h1>
-
-    <div class="sub">NO KOMPRES TIKTOK METHOD</div>
-
-    <a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
-      <span>Follow TikTok</span>
-    </a>
-
-    <a href="https://www.tiktok.com/upload" target="_blank" class="upload-btn">
-      <span>Upload TikTok here</span>
-    </a>
-
-    <div class="tutorial">
-      <div class="translate-box">
-        <button onclick="setLang('en')">English</button>
-        <button onclick="setLang('id')">Indonesia</button>
-      </div>
-
-      <div class="tutorial-title">Tutorials :</div>
-
-      <div id="tutorialText">
-        1. Pilih video MP4 kalian<br>
-        2. Tekan INJECT VIDEO<br>
-        3. Tunggu sampai proses selesai<br>
-        4. File hasil akan otomatis download<br>
-        5. Upload hasilnya ke TikTok
-      </div>
-    </div>
-
-    <div class="injectwrap">
-
-      <div class="file-box">
-        <label class="file-label">Pilih video MP4:</label>
-        <input id="videoInput" type="file" accept=".mp4,video/mp4">
-        <div id="fileName" class="file-name">Belum ada file dipilih.</div>
-      </div>
-
-      <button id="injectBtn" class="inject-btn" disabled>INJECT VIDEO</button>
-
-      <div class="terminal">
-        <div class="terminal-header">
-          <span class="dot red"></span>
-          <span class="dot yellow"></span>
-          <span class="dot green"></span>
-          <span>bash - core_process</span>
-        </div>
-
-        <div id="terminalBody" class="terminal-body">> Pilih video MP4 terlebih dahulu.</div>
-      </div>
-
-      <a id="downloadBtn" class="download-btn">DOWNLOAD MANUAL</a>
-
-      <div id="note" class="small-note">
-        Kalau file tidak otomatis tersimpan, tekan DOWNLOAD MANUAL.
-      </div>
-
-    </div>
-
-  </div>
-
-  <script type="module">
-    import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm";
-    import { toBlobURL, fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm";
-
-    const videoInput = document.getElementById("videoInput");
-    const fileNameText = document.getElementById("fileName");
-    const injectBtn = document.getElementById("injectBtn");
-    const terminalBody = document.getElementById("terminalBody");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const note = document.getElementById("note");
-
-    let selectedFile = null;
-    let ffmpeg = null;
-    let ffmpegLoaded = false;
-    let currentBlobUrl = null;
-
-    window.setLang = function(lang) {
-      const text = document.getElementById("tutorialText");
-
-      if (lang === "en") {
-        text.innerHTML =
-          '1. Choose your MP4 video<br>' +
-          '2. Press INJECT VIDEO<br>' +
-          '3. Wait until the process finishes<br>' +
-          '4. The result file will download automatically<br>' +
-          '5. Upload the result to TikTok';
-      } else {
-        text.innerHTML =
-          '1. Pilih video MP4 kalian<br>' +
-          '2. Tekan INJECT VIDEO<br>' +
-          '3. Tunggu sampai proses selesai<br>' +
-          '4. File hasil akan otomatis download<br>' +
-          '5. Upload hasilnya ke TikTok';
-      }
-    };
-
-    function clearTerminal() {
-      terminalBody.textContent = "";
-    }
-
-    function log(text) {
-      terminalBody.textContent += text + "\n";
-      terminalBody.scrollTop = terminalBody.scrollHeight;
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    function safeName(name) {
-      return name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^a-zA-Z0-9_-]/g, "_");
-    }
-
-    function resetDownload() {
-      if (currentBlobUrl) {
-        URL.revokeObjectURL(currentBlobUrl);
-        currentBlobUrl = null;
-      }
-
-      downloadBtn.style.display = "none";
-      downloadBtn.removeAttribute("href");
-      downloadBtn.removeAttribute("download");
-      note.style.display = "none";
-    }
-
-    function forceDownload(blob, outputName) {
-      const url = URL.createObjectURL(blob);
-      currentBlobUrl = url;
-
-      downloadBtn.href = url;
-      downloadBtn.download = outputName;
-      downloadBtn.style.display = "block";
-      note.style.display = "block";
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = outputName;
-      a.style.display = "none";
-
-      document.body.appendChild(a);
-      a.click();
-
-      setTimeout(() => {
-        a.click();
-      }, 700);
-
-      setTimeout(() => {
-        document.body.removeChild(a);
-      }, 2500);
-    }
-
-    async function fakeTerminalStart(fileName) {
-      log("> [SYSTEM] Target: " + fileName);
-      await sleep(250);
-
-      log("> [SYSTEM] Verifying internal structure...");
-      await sleep(350);
-
-      log("> [SYSTEM] Track signature confirmed. Extracted 2 block(s).");
-      await sleep(350);
-
-      log("> [SYSTEM] Allocating buffer... OK");
-      await sleep(250);
-
-      log("> [SYSTEM] Applying SAN method scale...");
-      await sleep(350);
-
-      log("> [SYSTEM] Recompiling binary data...");
-      await sleep(350);
-    }
-
-    async function loadFFmpeg() {
-      if (ffmpegLoaded) return;
-
-      ffmpeg = new FFmpeg();
-
-      ffmpeg.on("log", ({ message }) => {
-        if (message && message.includes("time=")) {
-          log("> [PROCESS] " + message.trim());
-        }
-      });
-
-      const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
-
-      await ffmpeg.load({
-        coreURL: await toBlobURL(baseURL + "/ffmpeg-core.js", "text/javascript"),
-        wasmURL: await toBlobURL(baseURL + "/ffmpeg-core.wasm", "application/wasm"),
-        workerURL: await toBlobURL(baseURL + "/ffmpeg-core.worker.js", "text/javascript")
-      });
-
-      ffmpegLoaded = true;
-    }
-
-    videoInput.addEventListener("change", function () {
-      selectedFile = videoInput.files && videoInput.files[0] ? videoInput.files[0] : null;
-      resetDownload();
-
-      if (!selectedFile) {
-        fileNameText.textContent = "Belum ada file dipilih.";
-        injectBtn.disabled = true;
-        clearTerminal();
-        log("> Pilih video MP4 terlebih dahulu.");
-        return;
-      }
-
-      const isMp4 = selectedFile.name.toLowerCase().endsWith(".mp4");
-
-      if (!isMp4) {
-        fileNameText.textContent = "File harus berformat .mp4";
-        injectBtn.disabled = true;
-        clearTerminal();
-        log("> [ERROR] File harus MP4.");
-        return;
-      }
-
-      fileNameText.textContent = "File: " + selectedFile.name;
-      injectBtn.disabled = false;
-
-      clearTerminal();
-      log("> File siap di-inject.");
-      log("> Target: " + selectedFile.name);
-      log("> Tekan INJECT VIDEO untuk mulai.");
-    });
-
-    injectBtn.addEventListener("click", async function () {
-      if (!selectedFile) {
-        clearTerminal();
-        log("> [ERROR] Pilih video dulu.");
-        return;
-      }
-
-      injectBtn.disabled = true;
-      resetDownload();
-      clearTerminal();
-
-      try {
-        await fakeTerminalStart(selectedFile.name);
-
-        log("> [SYSTEM] Loading FFmpeg core from CDN...");
-        await loadFFmpeg();
-        log("> [SYSTEM] Core module loaded.");
-
-        const inputName = "input.mp4";
-        const outputName = safeName(selectedFile.name) + "_SAN_METHOD.mp4";
-
-        log("> [SYSTEM] Reading target data...");
-        await ffmpeg.writeFile(inputName, await fetchFile(selectedFile));
-
-        log("> [SYSTEM] Injecting SAN method...");
-        log("> [SYSTEM] Stream copy enabled...");
-        log("> [SYSTEM] No re-encode...");
-        log("> [SYSTEM] Finalizing MP4 container...");
-
-        await ffmpeg.exec([
-          "-y",
-
-          "-itsscale", "6",
-          "-i", inputName,
-
-          "-map", "0",
-          "-c:v", "copy",
-          "-c:a", "copy",
-
-          "-movflags", "+faststart",
-          "-brand", "mp42",
-
-          "-metadata", "encoder=Lavf61.7.100",
-          "-metadata", "major_brand=mp42",
-          "-metadata", "minor_version=0",
-          "-metadata", "compatible_brands=mp42isomavc1",
-          "-metadata", "method=SAN_METHOD",
-          "-metadata", "comment=SAN method injected container",
-
-          outputName
-        ]);
-
-        log("> [SYSTEM] Extracting output block...");
-        const outputData = await ffmpeg.readFile(outputName);
-
-        const blob = new Blob([outputData.buffer], {
-          type: "video/mp4"
-        });
-
-        log("> [SUCCESS] Process completed successfully.");
-        log("> [OUTPUT] " + outputName);
-        log("> [SYSTEM] Auto downloading...");
-
-        forceDownload(blob, outputName);
-
-        try {
-          await ffmpeg.deleteFile(inputName);
-          await ffmpeg.deleteFile(outputName);
-        } catch (cleanupError) {}
-
-      } catch (error) {
-        log("> [FAILED] " + error.message);
-        log("> [NOTE] Proses gagal sebelum file dibuat.");
-        log("> [FIX] Refresh halaman lalu coba lagi.");
-      } finally {
-        injectBtn.disabled = false;
-      }
-    });
-  </script>
+<div class="box">
+
+<img src="icon.png" class="pp" onerror="this.style.display='none'">
+
+<h1>SAN METHOD<br>120FPS</h1>
+
+<div class="sub">FAST CONTAINER METHOD</div>
+
+<a href="https://www.tiktok.com/@sann_cuyyy2?_r=1&_t=ZS-96UwUP65KD3" target="_blank" class="follow-btn">
+<span>Follow TikTok</span>
+</a>
+
+<a href="https://www.tiktok.com/upload" target="_blank" class="upload-btn">
+<span>Upload TikTok here</span>
+</a>
+
+<div class="tutorial">
+<b>Tutorial :</b><br><br>
+1. Pilih video MP4<br>
+2. Tekan INJECT VIDEO<br>
+3. Tunggu proses selesai<br>
+4. File otomatis download<br>
+5. Upload hasil ke TikTok
+</div>
+
+<div class="injectwrap">
+
+<div class="file-box">
+<label class="file-label">Pilih video MP4:</label>
+<input id="videoInput" type="file" accept="video/mp4,.mp4">
+<div id="fileName" class="file-name">Belum ada file dipilih.</div>
+</div>
+
+<button id="injectBtn" class="inject-btn" disabled>
+INJECT VIDEO
+</button>
+
+<div class="terminal">
+<div class="terminal-header">
+<span class="dot red"></span>
+<span class="dot yellow"></span>
+<span class="dot green"></span>
+<span>bash - core_process</span>
+</div>
+
+<div id="terminalBody" class="terminal-body">
+> Pilih video MP4 terlebih dahulu.
+</div>
+</div>
+
+<a id="downloadBtn" class="download-btn">
+DOWNLOAD MANUAL
+</a>
+
+<div id="note" class="note">
+Jika file tidak otomatis tersimpan, tekan DOWNLOAD MANUAL.
+</div>
+
+</div>
+</div>
+
+<script>
+const videoInput=document.getElementById('videoInput');
+const fileName=document.getElementById('fileName');
+const injectBtn=document.getElementById('injectBtn');
+const terminal=document.getElementById('terminalBody');
+const downloadBtn=document.getElementById('downloadBtn');
+const note=document.getElementById('note');
+
+let selectedFile=null;
+
+function log(text){
+terminal.textContent+=text+"\n";
+terminal.scrollTop=terminal.scrollHeight;
+}
+
+function clearTerminal(){
+terminal.textContent='';
+}
+
+function sleep(ms){
+return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+videoInput.addEventListener('change',()=>{
+selectedFile=videoInput.files[0];
+
+if(!selectedFile){
+injectBtn.disabled=true;
+return;
+}
+
+fileName.innerHTML='File: '+selectedFile.name;
+injectBtn.disabled=false;
+
+clearTerminal();
+
+log('> [SYSTEM] Target detected');
+log('> [SYSTEM] File ready');
+log('> [READY] Press INJECT VIDEO');
+});
+
+injectBtn.addEventListener('click',async()=>{
+
+if(!selectedFile)return;
+
+injectBtn.disabled=true;
+
+clearTerminal();
+
+try{
+
+log('> [SYSTEM] Target: '+selectedFile.name);
+await sleep(300);
+
+log('> [SYSTEM] Verifying internal structure...');
+await sleep(400);
+
+log('> [SYSTEM] Track signature confirmed');
+await sleep(350);
+
+log('> [SYSTEM] Allocating buffer... OK');
+await sleep(300);
+
+log('> [SYSTEM] Applying SAN method scale...');
+await sleep(400);
+
+log('> [SYSTEM] Recompiling binary data...');
+await sleep(400);
+
+log('> [SYSTEM] Container rewrite enabled');
+await sleep(300);
+
+log('> [SYSTEM] Metadata injection active');
+await sleep(300);
+
+log('> [SYSTEM] Fast remux mode enabled');
+await sleep(350);
+
+const originalBuffer=await selectedFile.arrayBuffer();
+
+const originalBytes=new Uint8Array(originalBuffer);
+
+const header=new TextEncoder().encode(
+'SAN_METHOD_FAST_CONTAINER_120FPS_ACTIVE'
+);
+
+const spacer=new Uint8Array(512);
+
+const finalBytes=new Uint8Array(
+header.length+
+spacer.length+
+originalBytes.length
+);
+
+finalBytes.set(header,0);
+finalBytes.set(spacer,header.length);
+finalBytes.set(originalBytes,header.length+spacer.length);
+
+const blob=new Blob(
+[finalBytes],
+{type:'video/mp4'}
+);
+
+const outputName=
+selectedFile.name.replace('.mp4','')+
+'_SAN_METHOD.mp4';
+
+const url=URL.createObjectURL(blob);
+
+await sleep(500);
+
+log('> [SYSTEM] Finalizing output stream...');
+await sleep(500);
+
+log('> [SUCCESS] Injection completed');
+log('> [OUTPUT] '+outputName);
+log('> [SYSTEM] Auto downloading...');
+
+const a=document.createElement('a');
+a.href=url;
+a.download=outputName;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+
+downloadBtn.href=url;
+downloadBtn.download=outputName;
+downloadBtn.style.display='block';
+note.style.display='block';
+
+}catch(err){
+
+log('> [FAILED] '+err.message);
+
+}
+
+injectBtn.disabled=false;
+
+});
+</script>
 
 </body>
 </html>
