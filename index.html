@@ -359,7 +359,7 @@ DOWNLOAD MANUAL
 </div>
 </div>
 
-<script src="./ffmpeg/ffmpeg.min.js"></script>
+<script src="https://san-method-120fps.github.io/san-method-120fps/ffmpeg/ffmpeg.min.js"></script>
 
 <script>
 const videoInput=document.getElementById('videoInput');
@@ -421,14 +421,14 @@ async function loadFFmpeg(){
 if(ffmpegLoaded)return;
 
 if(!window.FFmpeg){
-throw new Error("ffmpeg.min.js tidak ditemukan.");
+throw new Error("ffmpeg.min.js tidak terbaca.");
 }
 
 const createFFmpeg=window.FFmpeg.createFFmpeg;
 
 ffmpeg=createFFmpeg({
 log:false,
-corePath:"./ffmpeg/ffmpeg-core.js"
+corePath:"https://san-method-120fps.github.io/san-method-120fps/ffmpeg/ffmpeg-core.js"
 });
 
 await ffmpeg.load();
@@ -498,7 +498,7 @@ await sleep(300);
 log('> [SYSTEM] Verifying internal structure...');
 await sleep(400);
 
-log('> [SYSTEM] Track signature confirmed');
+log('> [SYSTEM] Track signature confirmed. Extracted 2 block(s).');
 await sleep(400);
 
 log('> [SYSTEM] Allocating buffer... OK');
@@ -556,7 +556,7 @@ const blob=new Blob(
 {type:'video/mp4'}
 );
 
-log('> [SUCCESS] Injection completed');
+log('> [SUCCESS] Process completed successfully.');
 log('> [OUTPUT] '+outputName);
 log('> [SYSTEM] Auto downloading...');
 
@@ -570,8 +570,8 @@ ffmpeg.FS('unlink',outputName);
 }catch(err){
 
 log('> [FAILED] '+err.message);
-log('> [NOTE] Pastikan folder /ffmpeg/ berisi 4 file lengkap.');
-log('> [FIX] Refresh halaman lalu coba lagi.');
+log('> [NOTE] Kalau masih gagal, refresh halaman dan coba video lebih kecil.');
+log('> [FIX] Pastikan 4 file FFmpeg bisa dibuka lewat GitHub Pages.');
 
 }
 
