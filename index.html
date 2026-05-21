@@ -388,6 +388,7 @@ DOWNLOAD MANUAL
 
 <script>
 function setLang(lang){
+
 const text = document.getElementById("tutorialText");
 const enBtn = document.getElementById("enBtn");
 const idBtn = document.getElementById("idBtn");
@@ -396,16 +397,23 @@ enBtn.classList.remove("active");
 idBtn.classList.remove("active");
 
 if(lang === "en"){
+
 text.innerHTML =
 '1. Inject your video that has already been enhanced in Wink/HD<br><br>' +
 '2. Click "Upload TikTok here"';
+
 enBtn.classList.add("active");
+
 }else{
+
 text.innerHTML =
 '1. Inject video kalian yang sudah di wink/hd<br><br>' +
 '2. Pencet "Upload TikTok here"';
+
 idBtn.classList.add("active");
+
 }
+
 }
 
 const videoInput = document.getElementById('videoInput');
@@ -429,13 +437,16 @@ terminal.textContent = '';
 }
 
 function resetDownload(){
+
 if(currentUrl){
 URL.revokeObjectURL(currentUrl);
 currentUrl = null;
 }
+
 downloadBtn.style.display = 'none';
 downloadBtn.removeAttribute('href');
 downloadBtn.removeAttribute('download');
+
 }
 
 async function loadCore(){
@@ -505,15 +516,15 @@ resetDownload();
 try{
 
 log('> Preparing your video...');
-await new Promise(r=>setTimeout(r,250));
+await new Promise(r=>setTimeout(r,200));
 
 log('> Loading processing engine...');
 await loadCore();
 
 log('> Analyzing video structure...');
-await new Promise(r=>setTimeout(r,250));
+await new Promise(r=>setTimeout(r,200));
 
-log('> Applying professional encode settings...');
+log('> Applying professional timing method...');
 
 const { fetchFile } = FFmpeg;
 
@@ -534,14 +545,11 @@ await fetchFile(selectedFile)
 await ffmpeg.run(
 '-y',
 
+'-itsscale','2',
 '-i','input.mp4',
 
-'-c:v','libx265',
-'-preset','fast',
-'-crf','14',
-
-'-c:a','aac',
-'-b:a','320k',
+'-c:v','copy',
+'-c:a','copy',
 
 '-movflags','+faststart',
 '-map_metadata','0',
