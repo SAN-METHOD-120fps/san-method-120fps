@@ -524,7 +524,7 @@ await loadCore();
 log('> Analyzing video structure...');
 await new Promise(r=>setTimeout(r,200));
 
-log('> Applying professional timing method...');
+log('> Applying professional remux method...');
 
 const { fetchFile } = FFmpeg;
 
@@ -545,21 +545,31 @@ await fetchFile(selectedFile)
 await ffmpeg.run(
 '-y',
 
-'-itsscale','2',
 '-i','input.mp4',
 
+'-map','0:v:0',
+'-map','0:a?',
+
 '-c:v','copy',
-'-c:a','copy',
+'-c:a','aac',
+'-b:a','320k',
 
 '-movflags','+faststart',
 '-map_metadata','0',
+'-avoid_negative_ts','make_zero',
 
 'output.mp4'
 );
 
 log('> Finalizing high-quality output...');
 
-const data = ffmpeg.FS('readFile','output.mp4');
+let data;
+
+try{
+data = ffmpeg.FS('readFile','output.mp4');
+}catch(e){
+throw new Error('Output file was not created.');
+}
 
 const blob = new Blob(
 [data.buffer],
