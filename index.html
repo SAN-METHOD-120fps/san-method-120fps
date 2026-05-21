@@ -448,9 +448,11 @@ throw new Error('Processing engine not loaded. Refresh page.');
 
 const { createFFmpeg } = FFmpeg;
 
+const baseURL = window.location.origin + '/ffmpeg';
+
 ffmpeg = createFFmpeg({
 log:false,
-corePath:'ffmpeg/ffmpeg-core.js'
+corePath: baseURL + '/ffmpeg-core.js'
 });
 
 await ffmpeg.load();
