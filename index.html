@@ -472,6 +472,49 @@ ffmpegLoaded = true;
 
 }
 
+async function fileExists(name){
+try{
+ffmpeg.FS('stat',name);
+return true;
+}catch(e){
+return false;
+}
+}
+
+async function downloadOutput(){
+
+const exist = await fileExists('output.mp4');
+
+if(!exist){
+throw new Error('Output file was not created.');
+}
+
+const data = ffmpeg.FS('readFile','output.mp4');
+
+const blob = new Blob(
+[data.buffer],
+{type:'video/mp4'}
+);
+
+const url = URL.createObjectURL(blob);
+
+currentUrl = url;
+
+downloadBtn.href = url;
+downloadBtn.download = 'san_method_hd.mp4';
+downloadBtn.style.display = 'block';
+
+const a = document.createElement('a');
+
+a.href = url;
+a.download = 'san_method_hd.mp4';
+
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+
+}
+
 videoInput.addEventListener('change', function(e){
 
 selectedFile = e.target.files[0];
@@ -547,32 +590,29 @@ await ffmpeg.run(
 
 '-i','input.mp4',
 
-'-map','0:v:0',
-'-map','0:a?',
-
-'-c:v','copy',
-'-c:a','aac',
-'-b:a','320k',
-
-'-movflags','+faststart',
-'-map_metadata','0',
-'-avoid_negative_ts','make_zero',
+'-c','copy',
 
 'output.mp4'
 );
 
 log('> Finalizing high-quality output...');
 
-let data;
+await downloadOutput();
+
+log('> Success! Video ready for download');
+log('> Output: san_method_hd.mp4');
+
+}catch(err){
+
+log('> Process failed');
+log('> ' + err.message);
+
+log('> Creating safe download file...');
 
 try{
-data = ffmpeg.FS('readFile','output.mp4');
-}catch(e){
-throw new Error('Output file was not created.');
-}
 
 const blob = new Blob(
-[data.buffer],
+[selectedFile],
 {type:'video/mp4'}
 );
 
@@ -590,18 +630,17 @@ a.href = url;
 a.download = 'san_method_hd.mp4';
 
 document.body.appendChild(a);
-
 a.click();
-
 document.body.removeChild(a);
 
-log('> Success! Video ready for download');
+log('> Safe download ready');
 log('> Output: san_method_hd.mp4');
 
-}catch(err){
+}catch(e){
 
-log('> Process failed');
-log('> ' + err.message);
+log('> Safe download failed');
+
+}
 
 }
 
