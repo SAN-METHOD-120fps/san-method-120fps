@@ -39,17 +39,20 @@ const terminal = document.getElementById('terminalBody');
 const downloadBtn = document.getElementById('downloadBtn');
 
 let selectedFile = null;
-let selectedVideoInfo = null;
 let ffmpeg = null;
 let ffmpegLoaded = false;
 let currentUrl = null;
 let progressTimer = null;
 
 /* =========================
-   AUTO UI: OPTION BOX
+   OPTION FPS + RESOLUSI
 ========================= */
 
-const optionBox = document.createElement('div');
+let optionBox = document.getElementById('optionBox');
+
+if(!optionBox){
+
+optionBox = document.createElement('div');
 optionBox.id = 'optionBox';
 optionBox.style.display = 'none';
 optionBox.style.marginBottom = '24px';
@@ -110,15 +113,21 @@ Info video belum tersedia.
 
 injectBtn.parentNode.insertBefore(optionBox, injectBtn);
 
+}
+
 const fpsSelect = document.getElementById('fpsSelect');
 const resolutionSelect = document.getElementById('resolutionSelect');
 const videoInfoText = document.getElementById('videoInfoText');
 
 /* =========================
-   AUTO UI: PROGRESS BAR
+   PROGRESS BAR
 ========================= */
 
-const progressBox = document.createElement('div');
+let progressBox = document.getElementById('progressBox');
+
+if(!progressBox){
+
+progressBox = document.createElement('div');
 progressBox.id = 'progressBox';
 progressBox.style.width = '100%';
 progressBox.style.margin = '0 0 24px';
@@ -162,12 +171,14 @@ text-align:left;
 
 injectBtn.parentNode.insertBefore(progressBox, injectBtn.nextSibling);
 
+}
+
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
 const progressStatus = document.getElementById('progressStatus');
 
 /* =========================
-   BASIC FUNCTION
+   BASIC
 ========================= */
 
 function log(text){
@@ -177,6 +188,10 @@ terminal.scrollTop = terminal.scrollHeight;
 
 function clearTerminal(){
 terminal.textContent = '';
+}
+
+function sleep(ms){
+return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function resetDownload(){
@@ -192,7 +207,7 @@ downloadBtn.removeAttribute('download');
 
 }
 
-function setProgress(percent,status){
+function setProgress(percent, status){
 
 percent = Math.max(0, Math.min(100, Math.floor(percent)));
 
@@ -218,6 +233,7 @@ progressTimer = null;
 function resetProgress(){
 
 stopProgress();
+
 progressBox.style.display = 'none';
 progressFill.style.width = '0%';
 progressText.textContent = '0%';
@@ -231,40 +247,36 @@ stopProgress();
 
 let value = 0;
 
-setProgress(0,'Memulai proses inject...');
+setProgress(0, 'Memulai proses inject...');
 
-progressTimer = setInterval(()=>{
+progressTimer = setInterval(function(){
 
 if(value < 15){
 value += 2;
-setProgress(value,'Menyiapkan video...');
+setProgress(value, 'Menyiapkan video...');
 }else if(value < 35){
 value += 1;
-setProgress(value,'Memuat engine patcher...');
+setProgress(value, 'Memuat engine patcher...');
 }else if(value < 60){
 value += 1;
-setProgress(value,'Menganalisis struktur video...');
+setProgress(value, 'Menganalisis struktur video...');
 }else if(value < 88){
 value += 1;
-setProgress(value,'Menjalankan inject video...');
+setProgress(value, 'Menjalankan inject video...');
 }else if(value < 95){
 value += 1;
-setProgress(value,'Finalisasi output...');
+setProgress(value, 'Finalisasi output...');
 }
 
-},250);
+}, 250);
 
 }
 
 function finishProgress(status){
 
 stopProgress();
-setProgress(100,status || 'Selesai. File otomatis terdownload.');
+setProgress(100, status || 'Selesai. File otomatis terdownload.');
 
-}
-
-function sleep(ms){
-return new Promise(resolve=>setTimeout(resolve,ms));
 }
 
 /* =========================
@@ -273,7 +285,7 @@ return new Promise(resolve=>setTimeout(resolve,ms));
 
 function getVideoInfo(file){
 
-return new Promise((resolve,reject)=>{
+return new Promise(function(resolve, reject){
 
 const video = document.createElement('video');
 const url = URL.createObjectURL(file);
@@ -297,8 +309,10 @@ resolve(info);
 };
 
 video.onerror = function(){
+
 URL.revokeObjectURL(url);
 reject(new Error('Gagal membaca metadata video.'));
+
 };
 
 video.src = url;
@@ -321,7 +335,7 @@ function formatDuration(seconds){
 if(!seconds || isNaN(seconds)) return '0:00';
 
 const m = Math.floor(seconds / 60);
-const s = Math.floor(seconds % 60).toString().padStart(2,'0');
+const s = Math.floor(seconds % 60).toString().padStart(2, '0');
 
 return m + ':' + s;
 
@@ -331,11 +345,9 @@ function buildResolutionOptions(info){
 
 resolutionSelect.innerHTML = '';
 
-const originalText = info.width + 'x' + info.height + ' Original';
-
 const original = document.createElement('option');
 original.value = 'original';
-original.textContent = originalText;
+original.textContent = info.width + 'x' + info.height + ' Original';
 resolutionSelect.appendChild(original);
 
 const isPortrait = info.height >= info.width;
@@ -376,10 +388,7 @@ const parts = resolution.split('x');
 
 if(parts.length !== 2) return null;
 
-const w = parts[0];
-const h = parts[1];
-
-return 'scale=' + w + ':' + h + ':flags=lanczos';
+return 'scale=' + parts[0] + ':' + parts[1] + ':flags=lanczos';
 
 }
 
@@ -417,7 +426,7 @@ async function loadCore(){
 if(ffmpegLoaded) return;
 
 if(!window.FFmpeg){
-throw new Error('FFmpeg engine tidak ditemukan.');
+throw new Error('FFmpeg engine tidak ditemukan. Pastikan folder ffmpeg lengkap.');
 }
 
 const { createFFmpeg } = FFmpeg;
@@ -425,7 +434,7 @@ const { createFFmpeg } = FFmpeg;
 const baseURL = window.location.origin + '/ffmpeg';
 
 ffmpeg = createFFmpeg({
-log:false,
+log: false,
 corePath: baseURL + '/ffmpeg-core.js'
 });
 
@@ -476,7 +485,7 @@ throw new Error('Output video tidak berhasil dibuat.');
 const data = ffmpeg.FS('readFile', 'output.mp4');
 
 const blob = new Blob([data.buffer], {
-type:'video/mp4'
+type: 'video/mp4'
 });
 
 await autoDownload(blob);
@@ -486,7 +495,7 @@ await autoDownload(blob);
 async function safeDownloadOriginal(){
 
 const blob = new Blob([selectedFile], {
-type:'video/mp4'
+type: 'video/mp4'
 });
 
 await autoDownload(blob);
@@ -494,7 +503,7 @@ await autoDownload(blob);
 }
 
 /* =========================
-   EVENT: FILE SELECT
+   FILE SELECT
 ========================= */
 
 videoInput.addEventListener('change', async function(e){
@@ -515,23 +524,23 @@ log('> Membaca informasi video...');
 
 try{
 
-selectedVideoInfo = await getVideoInfo(selectedFile);
+const info = await getVideoInfo(selectedFile);
 
-buildResolutionOptions(selectedVideoInfo);
+buildResolutionOptions(info);
 
 optionBox.style.display = 'block';
 
 videoInfoText.innerHTML =
-'Resolusi asli: ' + selectedVideoInfo.width + 'x' + selectedVideoInfo.height + '<br>' +
-'Durasi: ' + formatDuration(selectedVideoInfo.duration) + '<br>' +
-'Ukuran: ' + formatSize(selectedVideoInfo.size);
+'Resolusi asli: ' + info.width + 'x' + info.height + '<br>' +
+'Durasi: ' + formatDuration(info.duration) + '<br>' +
+'Ukuran: ' + formatSize(info.size);
 
-log('> Resolusi: ' + selectedVideoInfo.width + 'x' + selectedVideoInfo.height);
-log('> Durasi: ' + formatDuration(selectedVideoInfo.duration));
-log('> Ukuran: ' + formatSize(selectedVideoInfo.size));
+log('> Resolusi: ' + info.width + 'x' + info.height);
+log('> Durasi: ' + formatDuration(info.duration));
+log('> Ukuran: ' + formatSize(info.size));
 log('> Pilih FPS dan resolusi, lalu tekan INJECT VIDEO.');
 
-setProgress(0,'Video siap diproses.');
+setProgress(0, 'Video siap diproses.');
 
 }catch(err){
 
@@ -546,7 +555,6 @@ log('> Video tetap bisa diproses mode aman.');
 }else{
 
 selectedFile = null;
-selectedVideoInfo = null;
 injectBtn.disabled = true;
 
 optionBox.style.display = 'none';
@@ -562,14 +570,15 @@ resetProgress();
 });
 
 /* =========================
-   EVENT: INJECT
+   INJECT VIDEO
 ========================= */
 
-injectBtn.addEventListener('click', async()=>{
+injectBtn.addEventListener('click', async function(){
 
 if(!selectedFile) return;
 
 injectBtn.disabled = true;
+
 clearTerminal();
 resetDownload();
 resetProgress();
@@ -593,11 +602,16 @@ await loadCore();
 
 const { fetchFile } = FFmpeg;
 
-try{ ffmpeg.FS('unlink','input.mp4'); }catch(e){}
-try{ ffmpeg.FS('unlink','output.mp4'); }catch(e){}
+try{ ffmpeg.FS('unlink', 'input.mp4'); }catch(e){}
+try{ ffmpeg.FS('unlink', 'output.mp4'); }catch(e){}
 
 log('> Membaca file MP4...');
-ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(selectedFile));
+
+ffmpeg.FS(
+'writeFile',
+'input.mp4',
+await fetchFile(selectedFile)
+);
 
 await sleep(400);
 
@@ -608,20 +622,20 @@ log('> Filter: ' + filters);
 
 await ffmpeg.run(
 '-y',
-'-i','input.mp4',
-'-map','0:v:0',
-'-map','0:a?',
+'-i', 'input.mp4',
+'-map', '0:v:0',
+'-map', '0:a?',
 '-vf', filters,
-'-c:v','libx264',
-'-preset','veryfast',
-'-crf','18',
-'-pix_fmt','yuv420p',
-'-c:a','aac',
-'-b:a','192k',
-'-movflags','+faststart',
-'-metadata','title=SAN METHOD HD 120FPS',
-'-metadata','comment=SAN METHOD VIDEO OPTIMIZER',
-'-metadata','encoder=SAN_METHOD_PATCHER',
+'-c:v', 'libx264',
+'-preset', 'veryfast',
+'-crf', '18',
+'-pix_fmt', 'yuv420p',
+'-c:a', 'aac',
+'-b:a', '192k',
+'-movflags', '+faststart',
+'-metadata', 'title=SAN METHOD HD 120FPS',
+'-metadata', 'comment=SAN METHOD VIDEO OPTIMIZER',
+'-metadata', 'encoder=SAN_METHOD_PATCHER',
 'output.mp4'
 );
 
@@ -632,13 +646,13 @@ log('> Mode: remux + faststart + metadata clean.');
 
 await ffmpeg.run(
 '-y',
-'-i','input.mp4',
-'-map','0',
-'-c','copy',
-'-movflags','+faststart',
-'-metadata','title=SAN METHOD HD 120FPS',
-'-metadata','comment=SAN METHOD FAST INJECT',
-'-metadata','encoder=SAN_METHOD_PATCHER',
+'-i', 'input.mp4',
+'-map', '0',
+'-c', 'copy',
+'-movflags', '+faststart',
+'-metadata', 'title=SAN METHOD HD 120FPS',
+'-metadata', 'comment=SAN METHOD FAST INJECT',
+'-metadata', 'encoder=SAN_METHOD_PATCHER',
 'output.mp4'
 );
 
