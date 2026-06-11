@@ -1,450 +1,3 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>SAN METHOD HD 120FPS</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-width:100%;
-min-height:100%;
-background:#000;
-font-family:Arial,sans-serif;
-overflow-x:hidden;
-}
-
-body{
-display:flex;
-justify-content:center;
-padding:18px 10px;
-}
-
-.box{
-width:100%;
-max-width:430px;
-background:#050505;
-border:2px solid cyan;
-border-radius:18px;
-padding:28px 18px;
-text-align:center;
-}
-
-.pp{
-width:110px;
-height:110px;
-border-radius:50%;
-object-fit:cover;
-border:4px solid cyan;
-display:block;
-margin:0 auto 24px;
-background:#111;
-}
-
-h1{
-font-size:46px;
-line-height:48px;
-font-weight:900;
-color:cyan;
-margin-bottom:18px;
-letter-spacing:1px;
-}
-
-.sub{
-font-size:15px;
-color:#fff;
-margin-bottom:22px;
-letter-spacing:2px;
-opacity:.9;
-}
-
-.follow-btn,
-.upload-btn{
-width:100%;
-height:58px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:14px;
-background:#000;
-text-decoration:none;
-font-size:21px;
-font-weight:900;
-letter-spacing:1px;
-color:#fff;
-margin-bottom:18px;
-position:relative;
-overflow:hidden;
-}
-
-.follow-btn::before{
-content:"";
-position:absolute;
-inset:0;
-padding:2px;
-border-radius:14px;
-background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
-background-size:300% 300%;
-animation:rgbBorder 4s linear infinite;
--webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
--webkit-mask-composite:xor;
-mask-composite:exclude;
-}
-
-.follow-btn::after{
-content:"";
-position:absolute;
-inset:2px;
-background:#000;
-border-radius:12px;
-z-index:1;
-}
-
-.follow-btn span,
-.upload-btn span{
-position:relative;
-z-index:2;
-}
-
-.upload-btn{
-border:2px solid red;
-}
-
-@keyframes rgbBorder{
-0%{background-position:0% 50%;}
-100%{background-position:300% 50%;}
-}
-
-.tutorial{
-width:100%;
-border:2px solid orange;
-border-radius:14px;
-padding:48px 20px 24px;
-margin-bottom:24px;
-background:#000;
-color:#fff;
-text-align:left;
-font-size:21px;
-line-height:1.8;
-position:relative;
-}
-
-.translate-box{
-position:absolute;
-top:14px;
-right:14px;
-display:flex;
-gap:8px;
-}
-
-.lang-btn{
-background:#111;
-color:#777;
-border:2px solid #555;
-border-radius:12px;
-padding:10px 18px;
-font-size:14px;
-cursor:pointer;
-transition:.2s;
-}
-
-.lang-btn.active{
-background:#fff;
-color:#000;
-border-color:#fff;
-}
-
-.tutorial-title{
-color:orange;
-font-weight:900;
-font-size:28px;
-margin-bottom:28px;
-}
-
-#tutorialText{
-font-size:21px;
-line-height:1.7;
-color:#fff;
-}
-
-.injectwrap{
-width:100%;
-padding:12px;
-border:2px solid cyan;
-border-radius:16px;
-background:#000;
-}
-
-.file-box{
-border:1px solid rgba(0,255,255,.7);
-border-radius:14px;
-padding:16px;
-margin-bottom:24px;
-text-align:left;
-background:#020707;
-}
-
-.file-label{
-font-size:14px;
-color:#9fffff;
-margin-bottom:10px;
-display:block;
-}
-
-input[type=file]{
-width:100%;
-background:#000;
-border:1px solid rgba(0,255,255,.4);
-border-radius:10px;
-padding:12px;
-font-size:15px;
-color:cyan;
-}
-
-.file-name{
-margin-top:12px;
-font-size:14px;
-line-height:1.5;
-color:#19fff4;
-word-break:break-all;
-}
-
-.inject-btn{
-width:100%;
-border:none;
-border-radius:14px;
-padding:24px 10px;
-margin-bottom:22px;
-background:#23d3d3;
-font-size:22px;
-font-weight:900;
-letter-spacing:8px;
-color:#000;
-cursor:pointer;
-}
-
-.inject-btn:disabled{
-opacity:.45;
-cursor:not-allowed;
-}
-
-.progress-box{
-display:none;
-width:100%;
-margin-bottom:22px;
-padding:14px;
-border:1px solid rgba(0,255,255,.6);
-border-radius:14px;
-background:#020707;
-}
-
-.progress-head{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
-font-family:"Courier New",monospace;
-font-size:13px;
-font-weight:bold;
-color:#9fffff;
-}
-
-.progress-track{
-width:100%;
-height:18px;
-background:#001313;
-border:1px solid rgba(0,255,255,.5);
-border-radius:20px;
-overflow:hidden;
-box-shadow:0 0 12px rgba(0,255,255,.25);
-}
-
-.progress-fill{
-width:0%;
-height:100%;
-border-radius:20px;
-background:linear-gradient(90deg,#00ffff,#23d3d3,#00aaff);
-box-shadow:0 0 18px cyan;
-transition:width .25s ease;
-}
-
-.progress-status{
-margin-top:10px;
-font-family:"Courier New",monospace;
-font-size:13px;
-color:#27ff4a;
-text-align:left;
-}
-
-.terminal{
-border-radius:16px;
-overflow:hidden;
-background:#000;
-border:1px solid rgba(255,255,255,.12);
-}
-
-.terminal-header{
-height:52px;
-background:#1d1d1d;
-display:flex;
-align-items:center;
-gap:10px;
-padding:0 18px;
-font-size:14px;
-letter-spacing:4px;
-color:#777;
-}
-
-.dot{
-width:17px;
-height:17px;
-border-radius:50%;
-}
-
-.red{background:#ff5f56;}
-.yellow{background:#ffbd2e;}
-.green{background:#27c93f;}
-
-.terminal-body{
-min-height:320px;
-max-height:420px;
-overflow-y:auto;
-padding:20px;
-font-size:14px;
-line-height:1.8;
-font-family:"Courier New",monospace;
-color:#27ff4a;
-white-space:pre-wrap;
-text-align:left;
-}
-
-.download-btn{
-display:none;
-margin-top:18px;
-padding:16px;
-border:2px solid cyan;
-border-radius:14px;
-text-decoration:none;
-color:cyan;
-font-weight:bold;
-font-size:16px;
-}
-
-@media(max-width:480px){
-h1{
-font-size:42px;
-line-height:44px;
-}
-
-.tutorial{
-font-size:18px;
-padding:48px 18px 22px;
-}
-
-.tutorial-title{
-font-size:25px;
-margin-bottom:22px;
-}
-
-#tutorialText{
-font-size:18px;
-}
-
-.lang-btn{
-font-size:13px;
-padding:8px 14px;
-}
-}
-</style>
-</head>
-
-<body>
-
-<div class="box">
-
-<img src="icon.png" class="pp" onerror="this.style.display='none'">
-
-<h1>SAN METHOD<br>HD 120FPS</h1>
-
-<div class="sub">NO KOMPRES TIKTOK METHOD</div>
-
-<a href="https://www.tiktok.com/" target="_blank" class="follow-btn">
-<span>Follow TikTok</span>
-</a>
-
-<a href="https://www.tiktok.com/tiktokstudio/upload" target="_blank" class="upload-btn">
-<span>Upload TikTok here</span>
-</a>
-
-<div class="tutorial">
-
-<div class="translate-box">
-<button id="enBtn" class="lang-btn" onclick="setLang('en')">English</button>
-<button id="idBtn" class="lang-btn active" onclick="setLang('id')">Indonesia</button>
-</div>
-
-<div class="tutorial-title">Tutorials :</div>
-
-<div id="tutorialText">
-1. Inject video kalian yang sudah di wink/hd<br><br>
-2. Pencet "Upload TikTok here"
-</div>
-
-</div>
-
-<div class="injectwrap">
-
-<div class="file-box">
-<label class="file-label">Pilih video MP4:</label>
-<input id="videoInput" type="file" accept="video/mp4,.mp4">
-<div id="fileName" class="file-name">Belum ada file dipilih.</div>
-</div>
-
-<button id="injectBtn" class="inject-btn" disabled>
-INJECT VIDEO
-</button>
-
-<div id="progressBox" class="progress-box">
-<div class="progress-head">
-<span>SAN METHOD PROCESS</span>
-<span id="progressText">0%</span>
-</div>
-<div class="progress-track">
-<div id="progressFill" class="progress-fill"></div>
-</div>
-<div id="progressStatus" class="progress-status">
-> Menunggu proses inject...
-</div>
-</div>
-
-<div class="terminal">
-<div class="terminal-header">
-<span class="dot red"></span>
-<span class="dot yellow"></span>
-<span class="dot green"></span>
-<span>bash - core_process</span>
-</div>
-
-<div id="terminalBody" class="terminal-body">
-> Pilih video MP4 terlebih dahulu.
-</div>
-</div>
-
-<a id="downloadBtn" class="download-btn">
-DOWNLOAD MANUAL
-</a>
-
-</div>
-</div>
-
 <script src="ffmpeg/ffmpeg.min.js"></script>
 
 <script>
@@ -460,16 +13,18 @@ idBtn.classList.remove("active");
 if(lang === "en"){
 
 text.innerHTML =
-'1. Inject your video that has already been enhanced in Wink/HD<br><br>' +
-'2. Click "Upload TikTok here"';
+'1. Select your video first<br><br>' +
+'2. Choose FPS and resolution<br><br>' +
+'3. Press "INJECT VIDEO"';
 
 enBtn.classList.add("active");
 
 }else{
 
 text.innerHTML =
-'1. Inject video kalian yang sudah di wink/hd<br><br>' +
-'2. Pencet "Upload TikTok here"';
+'1. Pilih video terlebih dahulu<br><br>' +
+'2. Pilih FPS dan resolusi<br><br>' +
+'3. Tekan "INJECT VIDEO"';
 
 idBtn.classList.add("active");
 
@@ -483,16 +38,137 @@ const injectBtn = document.getElementById('injectBtn');
 const terminal = document.getElementById('terminalBody');
 const downloadBtn = document.getElementById('downloadBtn');
 
-const progressBox = document.getElementById('progressBox');
-const progressFill = document.getElementById('progressFill');
-const progressText = document.getElementById('progressText');
-const progressStatus = document.getElementById('progressStatus');
-
 let selectedFile = null;
+let selectedVideoInfo = null;
 let ffmpeg = null;
 let ffmpegLoaded = false;
 let currentUrl = null;
 let progressTimer = null;
+
+/* =========================
+   AUTO UI: OPTION BOX
+========================= */
+
+const optionBox = document.createElement('div');
+optionBox.id = 'optionBox';
+optionBox.style.display = 'none';
+optionBox.style.marginBottom = '24px';
+optionBox.style.padding = '16px';
+optionBox.style.border = '1px solid rgba(0,255,255,.7)';
+optionBox.style.borderRadius = '14px';
+optionBox.style.background = '#020707';
+optionBox.style.textAlign = 'left';
+
+optionBox.innerHTML = `
+<label style="display:block;color:#9fffff;font-size:14px;margin-bottom:10px;font-weight:bold;">
+Pilih Mode FPS:
+</label>
+
+<select id="fpsSelect" style="
+width:100%;
+padding:13px;
+margin-bottom:16px;
+border-radius:10px;
+background:#000;
+color:cyan;
+border:1px solid rgba(0,255,255,.5);
+font-size:15px;
+font-weight:bold;
+">
+<option value="original">Original FPS</option>
+<option value="60">60 FPS</option>
+<option value="120">120 FPS</option>
+</select>
+
+<label style="display:block;color:#9fffff;font-size:14px;margin-bottom:10px;font-weight:bold;">
+Pilih Resolusi:
+</label>
+
+<select id="resolutionSelect" style="
+width:100%;
+padding:13px;
+border-radius:10px;
+background:#000;
+color:cyan;
+border:1px solid rgba(0,255,255,.5);
+font-size:15px;
+font-weight:bold;
+">
+<option value="original">Original Resolution</option>
+</select>
+
+<div id="videoInfoText" style="
+margin-top:14px;
+color:#19fff4;
+font-size:13px;
+line-height:1.6;
+word-break:break-word;
+">
+Info video belum tersedia.
+</div>
+`;
+
+injectBtn.parentNode.insertBefore(optionBox, injectBtn);
+
+const fpsSelect = document.getElementById('fpsSelect');
+const resolutionSelect = document.getElementById('resolutionSelect');
+const videoInfoText = document.getElementById('videoInfoText');
+
+/* =========================
+   AUTO UI: PROGRESS BAR
+========================= */
+
+const progressBox = document.createElement('div');
+progressBox.id = 'progressBox';
+progressBox.style.width = '100%';
+progressBox.style.margin = '0 0 24px';
+progressBox.style.padding = '14px';
+progressBox.style.border = '1px solid rgba(0,255,255,.5)';
+progressBox.style.borderRadius = '14px';
+progressBox.style.background = '#020707';
+progressBox.style.display = 'none';
+
+progressBox.innerHTML = `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<span style="color:#9fffff;font-size:13px;font-weight:bold;letter-spacing:1px;">
+SAN METHOD PROCESS
+</span>
+<span id="progressText" style="color:cyan;font-size:14px;font-weight:bold;">
+0%
+</span>
+</div>
+
+<div style="width:100%;height:18px;background:#000;border:1px solid rgba(0,255,255,.4);border-radius:20px;overflow:hidden;">
+<div id="progressFill" style="
+width:0%;
+height:100%;
+border-radius:20px;
+background:linear-gradient(90deg,#00ffff,#23d3d3,#00aaff);
+box-shadow:0 0 18px cyan;
+transition:width .25s ease;
+"></div>
+</div>
+
+<div id="progressStatus" style="
+margin-top:10px;
+color:#27ff4a;
+font-family:'Courier New',monospace;
+font-size:13px;
+text-align:left;
+">
+> Menunggu proses inject...
+</div>
+`;
+
+injectBtn.parentNode.insertBefore(progressBox, injectBtn.nextSibling);
+
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const progressStatus = document.getElementById('progressStatus');
+
+/* =========================
+   BASIC FUNCTION
+========================= */
 
 function log(text){
 terminal.textContent += text + '\n';
@@ -503,9 +179,22 @@ function clearTerminal(){
 terminal.textContent = '';
 }
 
+function resetDownload(){
+
+if(currentUrl){
+URL.revokeObjectURL(currentUrl);
+currentUrl = null;
+}
+
+downloadBtn.style.display = 'none';
+downloadBtn.removeAttribute('href');
+downloadBtn.removeAttribute('download');
+
+}
+
 function setProgress(percent,status){
 
-percent = Math.max(0,Math.min(100,Math.floor(percent)));
+percent = Math.max(0, Math.min(100, Math.floor(percent)));
 
 progressBox.style.display = 'block';
 progressFill.style.width = percent + '%';
@@ -526,6 +215,16 @@ progressTimer = null;
 
 }
 
+function resetProgress(){
+
+stopProgress();
+progressBox.style.display = 'none';
+progressFill.style.width = '0%';
+progressText.textContent = '0%';
+progressStatus.textContent = '> Menunggu proses inject...';
+
+}
+
 function startProgress(){
 
 stopProgress();
@@ -534,20 +233,23 @@ let value = 0;
 
 setProgress(0,'Memulai proses inject...');
 
-progressTimer = setInterval(function(){
+progressTimer = setInterval(()=>{
 
-if(value < 20){
+if(value < 15){
 value += 2;
-setProgress(value,'Menyiapkan file video...');
-}else if(value < 45){
+setProgress(value,'Menyiapkan video...');
+}else if(value < 35){
 value += 1;
 setProgress(value,'Memuat engine patcher...');
-}else if(value < 70){
+}else if(value < 60){
 value += 1;
 setProgress(value,'Menganalisis struktur video...');
-}else if(value < 92){
+}else if(value < 88){
 value += 1;
-setProgress(value,'Menjalankan patch video...');
+setProgress(value,'Menjalankan inject video...');
+}else if(value < 95){
+value += 1;
+setProgress(value,'Finalisasi output...');
 }
 
 },250);
@@ -561,39 +263,161 @@ setProgress(100,status || 'Selesai. File otomatis terdownload.');
 
 }
 
-function resetProgress(){
-
-stopProgress();
-progressBox.style.display = 'none';
-progressFill.style.width = '0%';
-progressText.textContent = '0%';
-progressStatus.textContent = '> Menunggu proses inject...';
-
-}
-
-function resetDownload(){
-
-if(currentUrl){
-URL.revokeObjectURL(currentUrl);
-currentUrl = null;
-}
-
-downloadBtn.style.display = 'none';
-downloadBtn.removeAttribute('href');
-downloadBtn.removeAttribute('download');
-
-}
-
-async function sleep(ms){
+function sleep(ms){
 return new Promise(resolve=>setTimeout(resolve,ms));
 }
+
+/* =========================
+   VIDEO INFO
+========================= */
+
+function getVideoInfo(file){
+
+return new Promise((resolve,reject)=>{
+
+const video = document.createElement('video');
+const url = URL.createObjectURL(file);
+
+video.preload = 'metadata';
+video.muted = true;
+video.playsInline = true;
+
+video.onloadedmetadata = function(){
+
+const info = {
+width: video.videoWidth || 0,
+height: video.videoHeight || 0,
+duration: video.duration || 0,
+size: file.size || 0
+};
+
+URL.revokeObjectURL(url);
+resolve(info);
+
+};
+
+video.onerror = function(){
+URL.revokeObjectURL(url);
+reject(new Error('Gagal membaca metadata video.'));
+};
+
+video.src = url;
+
+});
+
+}
+
+function formatSize(bytes){
+
+if(!bytes) return '0 MB';
+
+const mb = bytes / 1024 / 1024;
+return mb.toFixed(2) + ' MB';
+
+}
+
+function formatDuration(seconds){
+
+if(!seconds || isNaN(seconds)) return '0:00';
+
+const m = Math.floor(seconds / 60);
+const s = Math.floor(seconds % 60).toString().padStart(2,'0');
+
+return m + ':' + s;
+
+}
+
+function buildResolutionOptions(info){
+
+resolutionSelect.innerHTML = '';
+
+const originalText = info.width + 'x' + info.height + ' Original';
+
+const original = document.createElement('option');
+original.value = 'original';
+original.textContent = originalText;
+resolutionSelect.appendChild(original);
+
+const isPortrait = info.height >= info.width;
+
+if(isPortrait){
+
+const r1080 = document.createElement('option');
+r1080.value = '1080x1920';
+r1080.textContent = '1080x1920 HD Portrait';
+resolutionSelect.appendChild(r1080);
+
+const r4k = document.createElement('option');
+r4k.value = '2160x3840';
+r4k.textContent = '2160x3840 4K Portrait';
+resolutionSelect.appendChild(r4k);
+
+}else{
+
+const r1080 = document.createElement('option');
+r1080.value = '1920x1080';
+r1080.textContent = '1920x1080 HD Landscape';
+resolutionSelect.appendChild(r1080);
+
+const r4k = document.createElement('option');
+r4k.value = '3840x2160';
+r4k.textContent = '3840x2160 4K Landscape';
+resolutionSelect.appendChild(r4k);
+
+}
+
+}
+
+function getScaleFilter(resolution){
+
+if(resolution === 'original') return null;
+
+const parts = resolution.split('x');
+
+if(parts.length !== 2) return null;
+
+const w = parts[0];
+const h = parts[1];
+
+return 'scale=' + w + ':' + h + ':flags=lanczos';
+
+}
+
+function getVideoFilters(){
+
+const fps = fpsSelect.value;
+const resolution = resolutionSelect.value;
+
+let filters = [];
+
+if(fps !== 'original'){
+filters.push('fps=' + fps);
+}
+
+const scale = getScaleFilter(resolution);
+
+if(scale){
+filters.push(scale);
+}
+
+if(filters.length === 0){
+return null;
+}
+
+return filters.join(',');
+
+}
+
+/* =========================
+   FFMPEG
+========================= */
 
 async function loadCore(){
 
 if(ffmpegLoaded) return;
 
 if(!window.FFmpeg){
-throw new Error('FFmpeg engine tidak ditemukan. File tetap akan dibuat mode aman.');
+throw new Error('FFmpeg engine tidak ditemukan.');
 }
 
 const { createFFmpeg } = FFmpeg;
@@ -614,7 +438,7 @@ ffmpegLoaded = true;
 async function fileExists(name){
 
 try{
-ffmpeg.FS('stat',name);
+ffmpeg.FS('stat', name);
 return true;
 }catch(e){
 return false;
@@ -649,9 +473,9 @@ if(!exist){
 throw new Error('Output video tidak berhasil dibuat.');
 }
 
-const data = ffmpeg.FS('readFile','output.mp4');
+const data = ffmpeg.FS('readFile', 'output.mp4');
 
-const blob = new Blob([data.buffer],{
+const blob = new Blob([data.buffer], {
 type:'video/mp4'
 });
 
@@ -661,7 +485,7 @@ await autoDownload(blob);
 
 async function safeDownloadOriginal(){
 
-const blob = new Blob([selectedFile],{
+const blob = new Blob([selectedFile], {
 type:'video/mp4'
 });
 
@@ -669,7 +493,11 @@ await autoDownload(blob);
 
 }
 
-videoInput.addEventListener('change',function(e){
+/* =========================
+   EVENT: FILE SELECT
+========================= */
+
+videoInput.addEventListener('change', async function(e){
 
 selectedFile = e.target.files[0];
 
@@ -683,16 +511,45 @@ injectBtn.disabled = false;
 
 clearTerminal();
 log('> Video MP4 terdeteksi.');
-log('> Siap menjalankan SAN METHOD patcher.');
-log('> Tekan INJECT VIDEO untuk mulai.');
+log('> Membaca informasi video...');
+
+try{
+
+selectedVideoInfo = await getVideoInfo(selectedFile);
+
+buildResolutionOptions(selectedVideoInfo);
+
+optionBox.style.display = 'block';
+
+videoInfoText.innerHTML =
+'Resolusi asli: ' + selectedVideoInfo.width + 'x' + selectedVideoInfo.height + '<br>' +
+'Durasi: ' + formatDuration(selectedVideoInfo.duration) + '<br>' +
+'Ukuran: ' + formatSize(selectedVideoInfo.size);
+
+log('> Resolusi: ' + selectedVideoInfo.width + 'x' + selectedVideoInfo.height);
+log('> Durasi: ' + formatDuration(selectedVideoInfo.duration));
+log('> Ukuran: ' + formatSize(selectedVideoInfo.size));
+log('> Pilih FPS dan resolusi, lalu tekan INJECT VIDEO.');
 
 setProgress(0,'Video siap diproses.');
+
+}catch(err){
+
+optionBox.style.display = 'none';
+
+log('> Gagal membaca info video.');
+log('> ' + err.message);
+log('> Video tetap bisa diproses mode aman.');
+
+}
 
 }else{
 
 selectedFile = null;
+selectedVideoInfo = null;
 injectBtn.disabled = true;
 
+optionBox.style.display = 'none';
 fileName.innerHTML = 'Belum ada file dipilih.';
 
 clearTerminal();
@@ -704,37 +561,74 @@ resetProgress();
 
 });
 
-injectBtn.addEventListener('click',async function(){
+/* =========================
+   EVENT: INJECT
+========================= */
+
+injectBtn.addEventListener('click', async()=>{
 
 if(!selectedFile) return;
 
 injectBtn.disabled = true;
-
 clearTerminal();
 resetDownload();
+resetProgress();
 
 startProgress();
 
 try{
 
-log('> Preparing your video...');
+const selectedFPS = fpsSelect.value;
+const selectedResolution = resolutionSelect.value;
+const filters = getVideoFilters();
+
+log('> Memulai SAN METHOD injector...');
 await sleep(400);
 
-log('> Loading processing engine...');
+log('> Mode FPS: ' + (selectedFPS === 'original' ? 'Original' : selectedFPS + ' FPS'));
+log('> Mode Resolusi: ' + selectedResolution);
+
+log('> Memuat engine patcher...');
 await loadCore();
 
 const { fetchFile } = FFmpeg;
 
-try{ffmpeg.FS('unlink','input.mp4');}catch(e){}
-try{ffmpeg.FS('unlink','output.mp4');}catch(e){}
+try{ ffmpeg.FS('unlink','input.mp4'); }catch(e){}
+try{ ffmpeg.FS('unlink','output.mp4'); }catch(e){}
 
-log('> Reading video file...');
-ffmpeg.FS('writeFile','input.mp4',await fetchFile(selectedFile));
+log('> Membaca file MP4...');
+ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(selectedFile));
 
 await sleep(400);
 
-log('> Running SAN METHOD patcher...');
-log('> Mode: remux + faststart + metadata patch.');
+if(filters){
+
+log('> Menjalankan real convert...');
+log('> Filter: ' + filters);
+
+await ffmpeg.run(
+'-y',
+'-i','input.mp4',
+'-map','0:v:0',
+'-map','0:a?',
+'-vf', filters,
+'-c:v','libx264',
+'-preset','veryfast',
+'-crf','18',
+'-pix_fmt','yuv420p',
+'-c:a','aac',
+'-b:a','192k',
+'-movflags','+faststart',
+'-metadata','title=SAN METHOD HD 120FPS',
+'-metadata','comment=SAN METHOD VIDEO OPTIMIZER',
+'-metadata','encoder=SAN_METHOD_PATCHER',
+'output.mp4'
+);
+
+}else{
+
+log('> Menjalankan fast inject...');
+log('> Mode: remux + faststart + metadata clean.');
 
 await ffmpeg.run(
 '-y',
@@ -743,12 +637,16 @@ await ffmpeg.run(
 '-c','copy',
 '-movflags','+faststart',
 '-metadata','title=SAN METHOD HD 120FPS',
-'-metadata','comment=SAN METHOD NO COMPRESS METHOD',
+'-metadata','comment=SAN METHOD FAST INJECT',
 '-metadata','encoder=SAN_METHOD_PATCHER',
 'output.mp4'
 );
 
-log('> Finalizing output...');
+}
+
+log('> Finalisasi output...');
+await sleep(500);
+
 await downloadOutput();
 
 finishProgress('Selesai. File otomatis terdownload.');
@@ -774,6 +672,7 @@ log('> Output: san_method.mp4');
 }catch(e){
 
 finishProgress('Gagal membuat file.');
+
 log('> Gagal membuat file.');
 log('> ' + e.message);
 
@@ -785,6 +684,3 @@ injectBtn.disabled = false;
 
 });
 </script>
-
-</body>
-</html>
