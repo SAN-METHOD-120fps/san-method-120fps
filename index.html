@@ -1,3 +1,5 @@
+<script src="ffmpeg/ffmpeg.min.js"></script>
+
 <script>
 function setLang(lang){
 
@@ -38,6 +40,124 @@ let selectedFile = null;
 let ffmpeg = null;
 let ffmpegLoaded = false;
 let currentUrl = null;
+let fakeProgressTimer = null;
+
+/* PROGRESS BAR OTOMATIS */
+const progressBox = document.createElement('div');
+progressBox.id = 'progressBox';
+progressBox.style.width = '100%';
+progressBox.style.margin = '0 0 24px';
+progressBox.style.padding = '14px';
+progressBox.style.border = '1px solid rgba(0,255,255,.5)';
+progressBox.style.borderRadius = '14px';
+progressBox.style.background = '#020707';
+progressBox.style.display = 'none';
+
+progressBox.innerHTML = `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<span style="color:#9fffff;font-size:13px;font-weight:bold;letter-spacing:1px;">SAN METHOD PROCESS</span>
+<span id="progressText" style="color:cyan;font-size:14px;font-weight:bold;">0%</span>
+</div>
+
+<div style="width:100%;height:18px;background:#000;border:1px solid rgba(0,255,255,.4);border-radius:20px;overflow:hidden;">
+<div id="progressFill" style="
+width:0%;
+height:100%;
+border-radius:20px;
+background:linear-gradient(90deg,#00ffff,#23d3d3,#00aaff);
+box-shadow:0 0 18px cyan;
+transition:width .25s ease;
+"></div>
+</div>
+
+<div id="progressStatus" style="margin-top:10px;color:#27ff4a;font-family:'Courier New',monospace;font-size:13px;text-align:left;">
+> Menunggu proses inject...
+</div>
+`;
+
+injectBtn.parentNode.insertBefore(progressBox, injectBtn.nextSibling);
+
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const progressStatus = document.getElementById('progressStatus');
+
+function setProgress(percent,status){
+
+percent = Math.max(0, Math.min(100, Math.floor(percent)));
+
+progressBox.style.display = 'block';
+progressFill.style.width = percent + '%';
+progressText.textContent = percent + '%';
+
+if(status){
+progressStatus.textContent = '> ' + status;
+}
+
+}
+
+function startFakeProgress(){
+
+stopFakeProgress();
+
+let value = 0;
+
+setProgress(0,'Memulai proses inject...');
+
+fakeProgressTimer = setInterval(()=>{
+
+if(value < 18){
+value += 2;
+setProgress(value,'Menyiapkan file video...');
+}else if(value < 38){
+value += 1;
+setProgress(value,'Memuat engine patcher...');
+}else if(value < 62){
+value += 1;
+setProgress(value,'Menganalisis struktur MP4...');
+}else if(value < 84){
+value += 1;
+setProgress(value,'Menjalankan patch video...');
+}else if(value < 94){
+value += 1;
+setProgress(value,'Finalisasi output...');
+}
+
+},250);
+
+}
+
+function stopFakeProgress(){
+
+if(fakeProgressTimer){
+clearInterval(fakeProgressTimer);
+fakeProgressTimer = null;
+}
+
+}
+
+function completeProgress(){
+
+stopFakeProgress();
+setProgress(100,'Selesai. File siap didownload.');
+
+}
+
+function failProgress(){
+
+stopFakeProgress();
+setProgress(100,'Mode aman selesai. File tetap dibuat.');
+
+}
+
+function resetProgress(){
+
+stopFakeProgress();
+progressFill.style.width = '0%';
+progressText.textContent = '0%';
+progressStatus.textContent = '> Menunggu proses inject...';
+progressBox.style.display = 'none';
+
+}
 
 function log(text){
 terminal.textContent += text + '\n';
@@ -85,12 +205,14 @@ ffmpegLoaded = true;
 }
 
 async function fileExists(name){
+
 try{
 ffmpeg.FS('stat', name);
 return true;
 }catch(e){
 return false;
 }
+
 }
 
 async function autoDownload(blob){
@@ -145,6 +267,7 @@ videoInput.addEventListener('change', function(e){
 selectedFile = e.target.files[0];
 
 resetDownload();
+resetProgress();
 
 if(selectedFile){
 
@@ -177,15 +300,20 @@ if(!selectedFile) return;
 injectBtn.disabled = true;
 clearTerminal();
 resetDownload();
+resetProgress();
+
+startFakeProgress();
 
 try{
 
 log('> Memulai SAN METHOD injector...');
-await new Promise(r=>setTimeout(r,300));
+await new Promise(r=>setTimeout(r,400));
 
+setProgress(10,'Mengecek file video...');
 log('> Mengecek struktur video...');
-await new Promise(r=>setTimeout(r,300));
+await new Promise(r=>setTimeout(r,400));
 
+setProgress(22,'Memuat engine patcher...');
 log('> Memuat engine patcher...');
 await loadCore();
 
@@ -194,11 +322,14 @@ const { fetchFile } = FFmpeg;
 try{ ffmpeg.FS('unlink','input.mp4'); }catch(e){}
 try{ ffmpeg.FS('unlink','output.mp4'); }catch(e){}
 
+setProgress(40,'Membaca file MP4...');
 log('> Membaca file MP4...');
+
 ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(selectedFile));
 
-await new Promise(r=>setTimeout(r,300));
+await new Promise(r=>setTimeout(r,400));
 
+setProgress(55,'Menjalankan patch video...');
 log('> Menjalankan patch video...');
 log('> Mode: remux, faststart, metadata clean.');
 
@@ -215,8 +346,13 @@ await ffmpeg.run(
 'output.mp4'
 );
 
+setProgress(88,'Finalisasi output...');
 log('> Finalisasi output...');
+await new Promise(r=>setTimeout(r,500));
+
 await downloadOutput();
+
+completeProgress();
 
 log('> Inject berhasil.');
 log('> File otomatis terdownload.');
@@ -230,12 +366,18 @@ log('> Membuat output aman dari file asli...');
 
 try{
 
+setProgress(80,'Membuat output aman...');
 await safeDownloadOriginal();
+
+failProgress();
 
 log('> File aman berhasil dibuat.');
 log('> Output: san_method.mp4');
 
 }catch(e){
+
+stopFakeProgress();
+setProgress(100,'Gagal membuat file.');
 
 log('> Gagal membuat file.');
 log('> ' + e.message);
