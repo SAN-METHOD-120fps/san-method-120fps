@@ -1,10 +1,10 @@
-<script src="ffmpeg/ffmpeg.min.js"></script>
-
 <script>
 function setLang(lang){
   var text = document.getElementById("tutorialText");
   var enBtn = document.getElementById("enBtn");
   var idBtn = document.getElementById("idBtn");
+
+  if(!text || !enBtn || !idBtn) return;
 
   enBtn.classList.remove("active");
   idBtn.classList.remove("active");
@@ -12,604 +12,1240 @@ function setLang(lang){
   if(lang === "en"){
     text.innerHTML =
       '1. Select your video first<br><br>' +
-      '2. Choose FPS and resolution<br><br>' +
-      '3. Press "INJECT VIDEO"';
+      '2. Press "INJECT VIDEO"<br><br>' +
+      '3. Upload the result to TikTok';
+
     enBtn.classList.add("active");
   }else{
     text.innerHTML =
-      '1. Pilih video terlebih dahulu<br><br>' +
-      '2. Pilih FPS dan resolusi<br><br>' +
-      '3. Tekan "INJECT VIDEO"';
+      '1. Pilih video MP4 terlebih dahulu<br><br>' +
+      '2. Tekan "INJECT VIDEO"<br><br>' +
+      '3. Upload hasilnya ke TikTok';
+
     idBtn.classList.add("active");
   }
 }
 
-var videoInput = document.getElementById("videoInput");
-var fileName = document.getElementById("fileName");
-var injectBtn = document.getElementById("injectBtn");
-var terminal = document.getElementById("terminalBody");
-var downloadBtn = document.getElementById("downloadBtn");
+document.addEventListener("DOMContentLoaded", function(){
 
-var selectedFile = null;
-var ffmpeg = null;
-var ffmpegLoaded = false;
-var currentUrl = null;
-var progressTimer = null;
+  var videoInput = document.getElementById("videoInput");
+  var fileName = document.getElementById("fileName");
+  var injectBtn = document.getElementById("injectBtn");
+  var terminal = document.getElementById("terminalBody");
+  var downloadBtn = document.getElementById("downloadBtn");
 
-function log(text){
-  terminal.textContent += text + "\n";
-  terminal.scrollTop = terminal.scrollHeight;
-}
-
-function clearTerminal(){
-  terminal.textContent = "";
-}
-
-function sleep(ms){
-  return new Promise(function(resolve){
-    setTimeout(resolve, ms);
-  });
-}
-
-function resetDownload(){
-  if(currentUrl){
-    URL.revokeObjectURL(currentUrl);
-    currentUrl = null;
+  if(!videoInput || !fileName || !injectBtn || !terminal || !downloadBtn){
+    return;
   }
 
-  downloadBtn.style.display = "none";
-  downloadBtn.removeAttribute("href");
-  downloadBtn.removeAttribute("download");
-}
+  var selectedFile = null;
+  var currentUrl = null;
+  var progressTimer = null;
+  var lastAnalysis = null;
 
-/* OPTION BOX */
-var optionBox = document.createElement("div");
-optionBox.style.display = "none";
-optionBox.style.marginBottom = "24px";
-optionBox.style.padding = "16px";
-optionBox.style.border = "1px solid rgba(0,255,255,.7)";
-optionBox.style.borderRadius = "14px";
-optionBox.style.background = "#020707";
-optionBox.style.textAlign = "left";
-
-var fpsLabel = document.createElement("label");
-fpsLabel.textContent = "Pilih Mode FPS:";
-fpsLabel.style.display = "block";
-fpsLabel.style.color = "#9fffff";
-fpsLabel.style.fontSize = "14px";
-fpsLabel.style.marginBottom = "10px";
-fpsLabel.style.fontWeight = "bold";
-
-var fpsSelect = document.createElement("select");
-fpsSelect.style.width = "100%";
-fpsSelect.style.padding = "13px";
-fpsSelect.style.marginBottom = "16px";
-fpsSelect.style.borderRadius = "10px";
-fpsSelect.style.background = "#000";
-fpsSelect.style.color = "cyan";
-fpsSelect.style.border = "1px solid rgba(0,255,255,.5)";
-fpsSelect.style.fontSize = "15px";
-fpsSelect.style.fontWeight = "bold";
-
-var fpsOpt1 = document.createElement("option");
-fpsOpt1.value = "original";
-fpsOpt1.textContent = "Original FPS";
-
-var fpsOpt2 = document.createElement("option");
-fpsOpt2.value = "60";
-fpsOpt2.textContent = "60 FPS";
-
-var fpsOpt3 = document.createElement("option");
-fpsOpt3.value = "120";
-fpsOpt3.textContent = "120 FPS";
-
-fpsSelect.appendChild(fpsOpt1);
-fpsSelect.appendChild(fpsOpt2);
-fpsSelect.appendChild(fpsOpt3);
-
-var resLabel = document.createElement("label");
-resLabel.textContent = "Pilih Resolusi:";
-resLabel.style.display = "block";
-resLabel.style.color = "#9fffff";
-resLabel.style.fontSize = "14px";
-resLabel.style.marginBottom = "10px";
-resLabel.style.fontWeight = "bold";
-
-var resolutionSelect = document.createElement("select");
-resolutionSelect.style.width = "100%";
-resolutionSelect.style.padding = "13px";
-resolutionSelect.style.borderRadius = "10px";
-resolutionSelect.style.background = "#000";
-resolutionSelect.style.color = "cyan";
-resolutionSelect.style.border = "1px solid rgba(0,255,255,.5)";
-resolutionSelect.style.fontSize = "15px";
-resolutionSelect.style.fontWeight = "bold";
-
-var resOriginal = document.createElement("option");
-resOriginal.value = "original";
-resOriginal.textContent = "Original Resolution";
-resolutionSelect.appendChild(resOriginal);
-
-var videoInfoText = document.createElement("div");
-videoInfoText.textContent = "Info video belum tersedia.";
-videoInfoText.style.marginTop = "14px";
-videoInfoText.style.color = "#19fff4";
-videoInfoText.style.fontSize = "13px";
-videoInfoText.style.lineHeight = "1.6";
-videoInfoText.style.wordBreak = "break-word";
-
-optionBox.appendChild(fpsLabel);
-optionBox.appendChild(fpsSelect);
-optionBox.appendChild(resLabel);
-optionBox.appendChild(resolutionSelect);
-optionBox.appendChild(videoInfoText);
-
-injectBtn.parentNode.insertBefore(optionBox, injectBtn);
-
-/* PROGRESS BAR */
-var progressBox = document.createElement("div");
-progressBox.style.width = "100%";
-progressBox.style.margin = "0 0 24px";
-progressBox.style.padding = "14px";
-progressBox.style.border = "1px solid rgba(0,255,255,.5)";
-progressBox.style.borderRadius = "14px";
-progressBox.style.background = "#020707";
-progressBox.style.display = "none";
-
-var progressTop = document.createElement("div");
-progressTop.style.display = "flex";
-progressTop.style.justifyContent = "space-between";
-progressTop.style.alignItems = "center";
-progressTop.style.marginBottom = "10px";
-
-var progressTitle = document.createElement("span");
-progressTitle.textContent = "SAN METHOD PROCESS";
-progressTitle.style.color = "#9fffff";
-progressTitle.style.fontSize = "13px";
-progressTitle.style.fontWeight = "bold";
-
-var progressText = document.createElement("span");
-progressText.textContent = "0%";
-progressText.style.color = "cyan";
-progressText.style.fontSize = "14px";
-progressText.style.fontWeight = "bold";
-
-progressTop.appendChild(progressTitle);
-progressTop.appendChild(progressText);
-
-var progressTrack = document.createElement("div");
-progressTrack.style.width = "100%";
-progressTrack.style.height = "18px";
-progressTrack.style.background = "#000";
-progressTrack.style.border = "1px solid rgba(0,255,255,.4)";
-progressTrack.style.borderRadius = "20px";
-progressTrack.style.overflow = "hidden";
-
-var progressFill = document.createElement("div");
-progressFill.style.width = "0%";
-progressFill.style.height = "100%";
-progressFill.style.borderRadius = "20px";
-progressFill.style.background = "linear-gradient(90deg,#00ffff,#23d3d3,#00aaff)";
-progressFill.style.boxShadow = "0 0 18px cyan";
-progressFill.style.transition = "width .25s ease";
-
-progressTrack.appendChild(progressFill);
-
-var progressStatus = document.createElement("div");
-progressStatus.textContent = "> Menunggu proses inject...";
-progressStatus.style.marginTop = "10px";
-progressStatus.style.color = "#27ff4a";
-progressStatus.style.fontFamily = "Courier New, monospace";
-progressStatus.style.fontSize = "13px";
-progressStatus.style.textAlign = "left";
-
-progressBox.appendChild(progressTop);
-progressBox.appendChild(progressTrack);
-progressBox.appendChild(progressStatus);
-
-injectBtn.parentNode.insertBefore(progressBox, injectBtn.nextSibling);
-
-function setProgress(percent, status){
-  percent = Math.max(0, Math.min(100, Math.floor(percent)));
-
-  progressBox.style.display = "block";
-  progressFill.style.width = percent + "%";
-  progressText.textContent = percent + "%";
-
-  if(status){
-    progressStatus.textContent = "> " + status;
+  function log(text){
+    terminal.textContent += text + "\n";
+    terminal.scrollTop = terminal.scrollHeight;
   }
-}
 
-function stopProgress(){
-  if(progressTimer){
-    clearInterval(progressTimer);
-    progressTimer = null;
+  function clearTerminal(){
+    terminal.textContent = "";
   }
-}
 
-function resetProgress(){
-  stopProgress();
-  progressBox.style.display = "none";
-  progressFill.style.width = "0%";
-  progressText.textContent = "0%";
-  progressStatus.textContent = "> Menunggu proses inject...";
-}
+  function formatSize(bytes){
+    var units = ["B","KB","MB","GB"];
+    var size = bytes;
+    var i = 0;
 
-function startProgress(){
-  stopProgress();
-
-  var value = 0;
-  setProgress(0, "Memulai proses inject...");
-
-  progressTimer = setInterval(function(){
-    if(value < 15){
-      value += 2;
-      setProgress(value, "Menyiapkan video...");
-    }else if(value < 35){
-      value += 1;
-      setProgress(value, "Memuat engine patcher...");
-    }else if(value < 60){
-      value += 1;
-      setProgress(value, "Menganalisis struktur video...");
-    }else if(value < 88){
-      value += 1;
-      setProgress(value, "Menjalankan inject video...");
-    }else if(value < 95){
-      value += 1;
-      setProgress(value, "Finalisasi output...");
+    while(size >= 1024 && i < units.length - 1){
+      size = size / 1024;
+      i++;
     }
-  }, 250);
-}
 
-function finishProgress(status){
-  stopProgress();
-  setProgress(100, status || "Selesai. File otomatis terdownload.");
-}
+    return size.toFixed(i ? 2 : 0) + " " + units[i];
+  }
 
-/* VIDEO INFO */
-function getVideoInfo(file){
-  return new Promise(function(resolve, reject){
-    var video = document.createElement("video");
-    var url = URL.createObjectURL(file);
+  function formatMbps(bits, seconds){
+    if(!seconds || seconds <= 0) return "n/a";
+    return (bits / seconds / 1000000).toFixed(2) + " Mbps";
+  }
 
-    video.preload = "metadata";
-    video.muted = true;
-    video.playsInline = true;
+  function formatFPS(fps){
+    if(!fps || !isFinite(fps)) return "n/a";
+    return fps.toFixed(2).replace(".00","") + " FPS";
+  }
 
-    video.onloadedmetadata = function(){
-      var info = {
-        width: video.videoWidth || 0,
-        height: video.videoHeight || 0,
-        duration: video.duration || 0,
-        size: file.size || 0
-      };
+  function resetDownload(){
+    if(currentUrl){
+      URL.revokeObjectURL(currentUrl);
+      currentUrl = null;
+    }
 
-      URL.revokeObjectURL(url);
-      resolve(info);
+    downloadBtn.style.display = "none";
+    downloadBtn.removeAttribute("href");
+    downloadBtn.removeAttribute("download");
+  }
+
+  /* ANALISIS VIDEO */
+  var analysisBox = document.createElement("div");
+  analysisBox.style.display = "none";
+  analysisBox.style.border = "1px solid rgba(0,255,255,.7)";
+  analysisBox.style.borderRadius = "14px";
+  analysisBox.style.padding = "16px";
+  analysisBox.style.marginBottom = "24px";
+  analysisBox.style.textAlign = "left";
+  analysisBox.style.background = "#020707";
+  analysisBox.style.color = "#9fffff";
+  analysisBox.style.fontSize = "14px";
+  analysisBox.style.lineHeight = "1.7";
+
+  analysisBox.innerHTML =
+    '<div style="color:cyan;font-weight:900;margin-bottom:10px;">ANALISIS VIDEO</div>' +
+    '<div id="analysisContent">Belum ada video.</div>';
+
+  injectBtn.parentNode.insertBefore(analysisBox, injectBtn);
+
+  var analysisContent = document.getElementById("analysisContent");
+
+  function showAnalysis(data){
+    analysisBox.style.display = "block";
+
+    analysisContent.innerHTML =
+      "Nama file: <b style='color:#19fff4'>" + data.name + "</b><br>" +
+      "FPS: <b style='color:#19fff4'>" + formatFPS(data.fps) + "</b><br>" +
+      "Bitrate: <b style='color:#19fff4'>" + data.bitrate + "</b><br>" +
+      "Ukuran file: <b style='color:#19fff4'>" + data.sizeText + "</b>";
+  }
+
+  /* PROGRESS BAR */
+  var progressBox = document.createElement("div");
+  progressBox.style.display = "none";
+  progressBox.style.width = "100%";
+  progressBox.style.margin = "0 0 24px";
+  progressBox.style.padding = "14px";
+  progressBox.style.border = "1px solid rgba(0,255,255,.6)";
+  progressBox.style.borderRadius = "14px";
+  progressBox.style.background = "#020707";
+
+  var progressTop = document.createElement("div");
+  progressTop.style.display = "flex";
+  progressTop.style.justifyContent = "space-between";
+  progressTop.style.alignItems = "center";
+  progressTop.style.marginBottom = "10px";
+
+  var progressTitle = document.createElement("span");
+  progressTitle.textContent = "SAN METHOD PROCESS";
+  progressTitle.style.color = "#9fffff";
+  progressTitle.style.fontSize = "13px";
+  progressTitle.style.fontWeight = "bold";
+  progressTitle.style.letterSpacing = "1px";
+
+  var progressText = document.createElement("span");
+  progressText.textContent = "0%";
+  progressText.style.color = "cyan";
+  progressText.style.fontSize = "14px";
+  progressText.style.fontWeight = "bold";
+
+  progressTop.appendChild(progressTitle);
+  progressTop.appendChild(progressText);
+
+  var progressTrack = document.createElement("div");
+  progressTrack.style.width = "100%";
+  progressTrack.style.height = "18px";
+  progressTrack.style.background = "#000";
+  progressTrack.style.border = "1px solid rgba(0,255,255,.4)";
+  progressTrack.style.borderRadius = "20px";
+  progressTrack.style.overflow = "hidden";
+
+  var progressFill = document.createElement("div");
+  progressFill.style.width = "0%";
+  progressFill.style.height = "100%";
+  progressFill.style.borderRadius = "20px";
+  progressFill.style.background = "linear-gradient(90deg,#00ffff,#23d3d3,#00aaff)";
+  progressFill.style.boxShadow = "0 0 18px cyan";
+  progressFill.style.transition = "width .25s ease";
+
+  progressTrack.appendChild(progressFill);
+
+  var progressStatus = document.createElement("div");
+  progressStatus.textContent = "> Menunggu proses inject...";
+  progressStatus.style.marginTop = "10px";
+  progressStatus.style.color = "#27ff4a";
+  progressStatus.style.fontFamily = "Courier New, monospace";
+  progressStatus.style.fontSize = "13px";
+  progressStatus.style.textAlign = "left";
+
+  progressBox.appendChild(progressTop);
+  progressBox.appendChild(progressTrack);
+  progressBox.appendChild(progressStatus);
+
+  injectBtn.parentNode.insertBefore(progressBox, injectBtn.nextSibling);
+
+  function setProgress(percent, status){
+    percent = Math.max(0, Math.min(100, Math.floor(percent)));
+
+    progressBox.style.display = "block";
+    progressFill.style.width = percent + "%";
+    progressText.textContent = percent + "%";
+
+    if(status){
+      progressStatus.textContent = "> " + status;
+    }
+  }
+
+  function stopProgress(){
+    if(progressTimer){
+      clearInterval(progressTimer);
+      progressTimer = null;
+    }
+  }
+
+  function resetProgress(){
+    stopProgress();
+
+    progressBox.style.display = "none";
+    progressFill.style.width = "0%";
+    progressText.textContent = "0%";
+    progressStatus.textContent = "> Menunggu proses inject...";
+  }
+
+  function startProgress(){
+    stopProgress();
+
+    var value = 0;
+    setProgress(0, "Memulai proses inject...");
+
+    progressTimer = setInterval(function(){
+      if(value < 20){
+        value += 2;
+        setProgress(value, "Membaca struktur MP4...");
+      }else if(value < 45){
+        value += 1;
+        setProgress(value, "Menganalisis sample table...");
+      }else if(value < 70){
+        value += 1;
+        setProgress(value, "Menjalankan patch video...");
+      }else if(value < 95){
+        value += 1;
+        setProgress(value, "Membuat output...");
+      }
+    }, 120);
+  }
+
+  function finishProgress(status){
+    stopProgress();
+    setProgress(100, status || "Selesai. File otomatis terdownload.");
+  }
+
+  /* ===== PATCH ENGINE DARI SCRIPT INJECT ===== */
+
+  var FAKE_SAMPLE = new Uint8Array([0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x00]);
+  var U32_MAX = 0xffffffff;
+  var U64_LIMIT = Number.MAX_SAFE_INTEGER;
+
+  function typeAt(bytes, off){
+    return String.fromCharCode(bytes[off], bytes[off+1], bytes[off+2], bytes[off+3]);
+  }
+
+  function dv(bytes){
+    return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  }
+
+  function readU32(bytes, off){
+    return dv(bytes).getUint32(off, false);
+  }
+
+  function readI32(bytes, off){
+    return dv(bytes).getInt32(off, false);
+  }
+
+  function readU64(bytes, off){
+    var view = dv(bytes);
+    var hi = view.getUint32(off, false);
+    var lo = view.getUint32(off + 4, false);
+    return hi * 4294967296 + lo;
+  }
+
+  function readI64(bytes, off){
+    var view = dv(bytes);
+    var hi = view.getInt32(off, false);
+    var lo = view.getUint32(off + 4, false);
+    return hi * 4294967296 + lo;
+  }
+
+  function writeU32(bytes, off, val){
+    if(!Number.isFinite(val) || val < 0 || val > U32_MAX){
+      throw new Error("uint32 overflow writing " + val);
+    }
+
+    dv(bytes).setUint32(off, Math.round(val), false);
+  }
+
+  function writeI32(bytes, off, val){
+    dv(bytes).setInt32(off, Math.round(val), false);
+  }
+
+  function writeU64(bytes, off, val){
+    if(!Number.isFinite(val) || val < 0 || val > U64_LIMIT){
+      throw new Error("uint64 value too large: " + val);
+    }
+
+    var hi = Math.floor(val / 4294967296);
+    var lo = Math.round(val - hi * 4294967296);
+    var view = dv(bytes);
+
+    view.setUint32(off, hi, false);
+    view.setUint32(off + 4, lo, false);
+  }
+
+  function writeI64(bytes, off, val){
+    if(!Number.isFinite(val) || Math.abs(val) > U64_LIMIT){
+      throw new Error("int64 value too large: " + val);
+    }
+
+    if(val >= 0){
+      writeU64(bytes, off, val);
+      return;
+    }
+
+    var pos = Math.pow(2,64) + val;
+    var hi = Math.floor(pos / 4294967296);
+    var lo = Math.round(pos - hi * 4294967296);
+    var view = dv(bytes);
+
+    view.setUint32(off, hi, false);
+    view.setUint32(off + 4, lo, false);
+  }
+
+  function boxSizeAt(bytes, off, end){
+    if(off + 8 > end){
+      throw new Error("Truncated MP4 box header.");
+    }
+
+    var size = readU32(bytes, off);
+    var header = 8;
+    var type = typeAt(bytes, off + 4);
+
+    if(size === 1){
+      size = readU64(bytes, off + 8);
+      header = 16;
+    }else if(size === 0){
+      size = end - off;
+    }
+
+    if(size < header || off + size > end){
+      throw new Error("Bad MP4 box " + type + " at " + off + ", size " + size);
+    }
+
+    return {
+      type:type,
+      size:size,
+      header:header,
+      start:off,
+      end:off + size
     };
-
-    video.onerror = function(){
-      URL.revokeObjectURL(url);
-      reject(new Error("Gagal membaca metadata video."));
-    };
-
-    video.src = url;
-  });
-}
-
-function formatSize(bytes){
-  if(!bytes) return "0 MB";
-  return (bytes / 1024 / 1024).toFixed(2) + " MB";
-}
-
-function formatDuration(seconds){
-  if(!seconds || isNaN(seconds)) return "0:00";
-
-  var m = Math.floor(seconds / 60);
-  var s = Math.floor(seconds % 60).toString().padStart(2, "0");
-
-  return m + ":" + s;
-}
-
-function buildResolutionOptions(info){
-  resolutionSelect.innerHTML = "";
-
-  var original = document.createElement("option");
-  original.value = "original";
-  original.textContent = info.width + "x" + info.height + " Original";
-  resolutionSelect.appendChild(original);
-
-  var isPortrait = info.height >= info.width;
-
-  if(isPortrait){
-    var r1080 = document.createElement("option");
-    r1080.value = "1080x1920";
-    r1080.textContent = "1080x1920 HD Portrait";
-    resolutionSelect.appendChild(r1080);
-
-    var r4k = document.createElement("option");
-    r4k.value = "2160x3840";
-    r4k.textContent = "2160x3840 4K Portrait";
-    resolutionSelect.appendChild(r4k);
-  }else{
-    var l1080 = document.createElement("option");
-    l1080.value = "1920x1080";
-    l1080.textContent = "1920x1080 HD Landscape";
-    resolutionSelect.appendChild(l1080);
-
-    var l4k = document.createElement("option");
-    l4k.value = "3840x2160";
-    l4k.textContent = "3840x2160 4K Landscape";
-    resolutionSelect.appendChild(l4k);
-  }
-}
-
-function getScaleFilter(resolution){
-  if(resolution === "original") return null;
-
-  var parts = resolution.split("x");
-
-  if(parts.length !== 2) return null;
-
-  return "scale=" + parts[0] + ":" + parts[1] + ":flags=lanczos";
-}
-
-function getVideoFilters(){
-  var filters = [];
-
-  if(fpsSelect.value !== "original"){
-    filters.push("fps=" + fpsSelect.value);
   }
 
-  var scale = getScaleFilter(resolutionSelect.value);
+  function parseBoxes(bytes, start, end){
+    var out = [];
+    var pos = start;
 
-  if(scale){
-    filters.push(scale);
+    while(pos + 8 <= end){
+      var b = boxSizeAt(bytes, pos, end);
+      out.push(b);
+      pos = b.end;
+    }
+
+    return out;
   }
 
-  if(filters.length === 0){
+  function headerSize(box){
+    return readU32(box,0) === 1 ? 16 : 8;
+  }
+
+  function boxType(box){
+    return typeAt(box,4);
+  }
+
+  function childStart(box){
+    var t = boxType(box);
+    var h = headerSize(box);
+    return t === "meta" ? h + 4 : h;
+  }
+
+  function children(box){
+    return parseBoxes(box, childStart(box), box.length);
+  }
+
+  function findChild(box, type){
+    var list = children(box);
+
+    for(var i = 0; i < list.length; i++){
+      if(list[i].type === type){
+        return box.slice(list[i].start, list[i].end);
+      }
+    }
+
     return null;
   }
 
-  return filters.join(",");
-}
+  function findPath(box, path){
+    var cur = box;
 
-/* FFMPEG */
-async function loadCore(){
-  if(ffmpegLoaded) return;
+    for(var i = 0; i < path.length; i++){
+      cur = findChild(cur, path[i]);
+      if(!cur) return null;
+    }
 
-  if(!window.FFmpeg){
-    throw new Error("FFmpeg engine tidak ditemukan. Pastikan folder ffmpeg lengkap.");
+    return cur;
   }
 
-  var createFFmpeg = FFmpeg.createFFmpeg;
+  function concat(parts){
+    var size = 0;
 
-  var baseURL = window.location.origin + "/ffmpeg";
+    for(var i = 0; i < parts.length; i++){
+      size += parts[i].length;
+    }
 
-  ffmpeg = createFFmpeg({
-    log: false,
-    corePath: baseURL + "/ffmpeg-core.js"
-  });
+    var out = new Uint8Array(size);
+    var o = 0;
 
-  await ffmpeg.load();
+    for(var j = 0; j < parts.length; j++){
+      out.set(parts[j], o);
+      o += parts[j].length;
+    }
 
-  ffmpegLoaded = true;
-}
-
-async function fileExists(name){
-  try{
-    ffmpeg.FS("stat", name);
-    return true;
-  }catch(e){
-    return false;
-  }
-}
-
-async function autoDownload(blob){
-  var url = URL.createObjectURL(blob);
-  currentUrl = url;
-
-  downloadBtn.href = url;
-  downloadBtn.download = "san_method.mp4";
-  downloadBtn.style.display = "block";
-
-  var a = document.createElement("a");
-  a.href = url;
-  a.download = "san_method.mp4";
-
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-async function downloadOutput(){
-  var exist = await fileExists("output.mp4");
-
-  if(!exist){
-    throw new Error("Output video tidak berhasil dibuat.");
+    return out;
   }
 
-  var data = ffmpeg.FS("readFile", "output.mp4");
+  function makeBox(type, payload, large){
+    large = !!large;
 
-  var blob = new Blob([data.buffer], {
-    type: "video/mp4"
-  });
+    var size = payload.length + (large ? 16 : 8);
+    var out = new Uint8Array(size);
 
-  await autoDownload(blob);
-}
+    if(large){
+      writeU32(out,0,1);
+      out[4] = type.charCodeAt(0);
+      out[5] = type.charCodeAt(1);
+      out[6] = type.charCodeAt(2);
+      out[7] = type.charCodeAt(3);
+      writeU64(out,8,size);
+      out.set(payload,16);
+    }else{
+      writeU32(out,0,size);
+      out[4] = type.charCodeAt(0);
+      out[5] = type.charCodeAt(1);
+      out[6] = type.charCodeAt(2);
+      out[7] = type.charCodeAt(3);
+      out.set(payload,8);
+    }
 
-async function safeDownloadOriginal(){
-  var blob = new Blob([selectedFile], {
-    type: "video/mp4"
-  });
+    return out;
+  }
 
-  await autoDownload(blob);
-}
+  function rebuildContainer(box, mapChild){
+    var t = boxType(box);
+    var h = headerSize(box);
+    var cs = childStart(box);
+    var prefix = box.slice(h, cs);
+    var parts = [prefix];
+    var list = parseBoxes(box, cs, box.length);
 
-/* FILE SELECT */
-videoInput.addEventListener("change", async function(e){
-  selectedFile = e.target.files[0];
+    for(var i = 0; i < list.length; i++){
+      var b = list[i];
+      var child = box.slice(b.start, b.end);
+      parts.push(mapChild(child, b.type));
+    }
 
-  resetDownload();
-  resetProgress();
+    return makeBox(t, concat(parts), h === 16);
+  }
 
-  if(selectedFile){
-    fileName.innerHTML = "File: " + selectedFile.name;
-    injectBtn.disabled = false;
+  function parseMvhd(mvhd){
+    var version = mvhd[headerSize(mvhd)];
 
-    clearTerminal();
-    log("> Video MP4 terdeteksi.");
-    log("> Membaca informasi video...");
+    if(version === 0){
+      return {
+        version:version,
+        timescale:readU32(mvhd,20),
+        duration:readU32(mvhd,24)
+      };
+    }
+
+    return {
+      version:version,
+      timescale:readU32(mvhd,28),
+      duration:readU64(mvhd,32)
+    };
+  }
+
+  function patchMvhd(mvhd, newDuration){
+    var out = new Uint8Array(mvhd);
+    var version = out[headerSize(out)];
+
+    if(version === 0){
+      writeU32(out,24,newDuration);
+    }else{
+      writeU64(out,32,newDuration);
+    }
+
+    return out;
+  }
+
+  function patchTkhd(tkhd, newDuration){
+    var out = new Uint8Array(tkhd);
+    var version = out[headerSize(out)];
+
+    if(version === 0){
+      writeU32(out,28,newDuration);
+    }else{
+      writeU64(out,36,newDuration);
+    }
+
+    return out;
+  }
+
+  function parseMdhd(mdhd){
+    var version = mdhd[headerSize(mdhd)];
+
+    if(version === 0){
+      return {
+        version:version,
+        timescale:readU32(mdhd,20),
+        duration:readU32(mdhd,24)
+      };
+    }
+
+    return {
+      version:version,
+      timescale:readU32(mdhd,28),
+      duration:readU64(mdhd,32)
+    };
+  }
+
+  function patchMdhd(mdhd, newDuration){
+    var out = new Uint8Array(mdhd);
+    var version = out[headerSize(out)];
+
+    if(version === 0){
+      writeU32(out,24,newDuration);
+    }else{
+      writeU64(out,32,newDuration);
+    }
+
+    return out;
+  }
+
+  function handlerType(trak){
+    var hdlr = findPath(trak, ["mdia","hdlr"]);
+
+    if(!hdlr) return "";
+
+    return typeAt(hdlr, headerSize(hdlr) + 8);
+  }
+
+  function stsdCodec(stsd){
+    if(!stsd) return "";
+
+    var entryCount = readU32(stsd,12);
+
+    if(!entryCount) return "";
+
+    return typeAt(stsd,20);
+  }
+
+  function parseStts(stts){
+    var n = readU32(stts,12);
+    var sampleCount = 0;
+    var totalTicks = 0;
+    var lastDelta = 0;
+
+    for(var i = 0; i < n; i++){
+      var o = 16 + i * 8;
+      var c = readU32(stts,o);
+      var d = readU32(stts,o+4);
+
+      sampleCount += c;
+      totalTicks += c * d;
+      lastDelta = d;
+    }
+
+    return {
+      entryCount:n,
+      sampleCount:sampleCount,
+      totalTicks:totalTicks,
+      lastDelta:lastDelta
+    };
+  }
+
+  function parseStsz(stsz){
+    var sampleSize = readU32(stsz,12);
+    var sampleCount = readU32(stsz,16);
+    var trailingEight = 0;
+
+    if(sampleSize === 0){
+      for(var i = sampleCount - 1; i >= 0 && i >= sampleCount - 5000; i--){
+        if(readU32(stsz,20+i*4) === 8){
+          trailingEight++;
+        }else{
+          break;
+        }
+      }
+    }
+
+    return {
+      sampleSize:sampleSize,
+      sampleCount:sampleCount,
+      trailingEight:trailingEight
+    };
+  }
+
+  function parseStsc(stsc){
+    var n = readU32(stsc,12);
+
+    if(!n){
+      throw new Error("Video stsc has no entries.");
+    }
+
+    var o = 16 + (n - 1) * 12;
+
+    return {
+      entryCount:n,
+      lastFirstChunk:readU32(stsc,o),
+      lastSamplesPerChunk:readU32(stsc,o+4),
+      lastDescId:readU32(stsc,o+8)
+    };
+  }
+
+  function parseChunkTable(stcoOrCo64){
+    var t = boxType(stcoOrCo64);
+    var n = readU32(stcoOrCo64,12);
+
+    return {
+      type:t,
+      count:n
+    };
+  }
+
+  function parseElst(elst){
+    if(!elst) return null;
+
+    var version = elst[headerSize(elst)];
+    var entryCount = readU32(elst,12);
+
+    if(!entryCount) return null;
+
+    if(version === 0){
+      return {
+        version:version,
+        entryCount:entryCount,
+        segmentDuration:readU32(elst,16),
+        mediaTime:readI32(elst,20)
+      };
+    }
+
+    return {
+      version:version,
+      entryCount:entryCount,
+      segmentDuration:readU64(elst,16),
+      mediaTime:readI64(elst,24)
+    };
+  }
+
+  function patchElst(elst, newSegmentDuration){
+    var out = new Uint8Array(elst);
+    var version = out[headerSize(out)];
+
+    if(version === 0){
+      writeU32(out,16,newSegmentDuration);
+    }else{
+      writeU64(out,16,newSegmentDuration);
+    }
+
+    return out;
+  }
+
+  function analyzeMoov(moov){
+    var mvhd = findChild(moov,"mvhd");
+
+    if(!mvhd){
+      throw new Error("No mvhd atom found.");
+    }
+
+    var movie = parseMvhd(mvhd);
+
+    if(!movie.timescale){
+      throw new Error("Movie timescale is zero.");
+    }
+
+    var video = null;
+    var list = children(moov);
+
+    for(var i = 0; i < list.length; i++){
+      var b = list[i];
+
+      if(b.type !== "trak") continue;
+
+      var trak = moov.slice(b.start,b.end);
+
+      if(handlerType(trak) !== "vide") continue;
+
+      var mdhd = findPath(trak,["mdia","mdhd"]);
+      var stbl = findPath(trak,["mdia","minf","stbl"]);
+
+      if(!mdhd || !stbl) continue;
+
+      var stsd = findChild(stbl,"stsd");
+      var stsz = findChild(stbl,"stsz");
+      var stts = findChild(stbl,"stts");
+      var stsc = findChild(stbl,"stsc");
+      var stco = findChild(stbl,"stco") || findChild(stbl,"co64");
+
+      if(!stsz || !stts || !stsc || !stco){
+        throw new Error("Video track missing stsz/stts/stsc/stco atoms.");
+      }
+
+      var codec = stsdCodec(stsd);
+
+      if(codec !== "avc1" && codec !== "avc3"){
+        throw new Error("Codec " + (codec || "unknown") + " belum didukung. Gunakan MP4 H.264/AVC.");
+      }
+
+      var md = parseMdhd(mdhd);
+      var ts = parseStts(stts);
+      var sz = parseStsz(stsz);
+      var sc = parseStsc(stsc);
+      var co = parseChunkTable(stco);
+
+      if(sz.sampleSize !== 0){
+        throw new Error("Fixed-size stsz video samples are not supported.");
+      }
+
+      if(ts.sampleCount !== sz.sampleCount){
+        throw new Error("stts sample count tidak cocok dengan stsz sample count.");
+      }
+
+      if(!ts.lastDelta){
+        throw new Error("Could not read frame delta from stts.");
+      }
+
+      var elst = parseElst(findPath(trak,["edts","elst"]));
+
+      video = {
+        codec:codec,
+        mdhd:md,
+        stts:ts,
+        stsz:sz,
+        stsc:sc,
+        chunks:co,
+        elst:elst
+      };
+
+      break;
+    }
+
+    if(!video){
+      throw new Error("No AVC/H.264 video track found.");
+    }
+
+    var frameRate = video.mdhd.timescale / video.stts.lastDelta;
+    var targetFrames = Math.ceil(video.stsz.sampleCount * 20 / 3);
+    var fakeCount = targetFrames - video.stsz.sampleCount;
+
+    if(fakeCount < 1){
+      throw new Error("Target duration is not longer than current video.");
+    }
+
+    var fakeTicks = fakeCount * video.stts.lastDelta;
+    var newSttsTotal = video.stts.totalTicks + fakeTicks;
+    var newMdhdDuration = video.mdhd.duration + fakeTicks;
+    var editSkip = video.elst && video.elst.mediaTime > 0 ? video.elst.mediaTime : 0;
+    var oldVisibleSec = (video.stts.totalTicks - editSkip) / video.mdhd.timescale;
+    var newVisibleSec = (newSttsTotal - editSkip) / video.mdhd.timescale;
+    var newMovieDuration = Math.round(newVisibleSec * movie.timescale);
+    var newMvhdDuration = Math.max(movie.duration, newMovieDuration);
+
+    return {
+      movie:movie,
+      video:video,
+      frameRate:frameRate,
+      targetFrames:targetFrames,
+      fakeCount:fakeCount,
+      fakeTicks:fakeTicks,
+      newSttsTotal:newSttsTotal,
+      newMdhdDuration:newMdhdDuration,
+      newMovieDuration:newMovieDuration,
+      newMvhdDuration:newMvhdDuration,
+      oldVisibleSec:oldVisibleSec,
+      newVisibleSec:newVisibleSec
+    };
+  }
+
+  function patchStts(stts, fakeCount){
+    var out = new Uint8Array(stts);
+    var n = readU32(out,12);
+
+    if(!n){
+      throw new Error("Cannot patch empty stts.");
+    }
+
+    var last = 16 + (n - 1) * 8;
+    writeU32(out,last,readU32(out,last) + fakeCount);
+
+    return out;
+  }
+
+  function patchCtts(ctts, fakeCount){
+    var n = readU32(ctts,12);
+
+    if(!n) return ctts;
+
+    var last = 16 + (n - 1) * 8;
+    var version = ctts[headerSize(ctts)];
+    var lastOffset = version === 0 ? readU32(ctts,last+4) : readI32(ctts,last+4);
+
+    if(lastOffset === 0){
+      var out = new Uint8Array(ctts);
+      writeU32(out,last,readU32(out,last) + fakeCount);
+      return out;
+    }
+
+    var payload = new Uint8Array(ctts.length - headerSize(ctts) + 8);
+    payload.set(ctts.slice(headerSize(ctts)),0);
+    writeU32(payload,4,n+1);
+
+    var o = payload.length - 8;
+    writeU32(payload,o,fakeCount);
+    writeU32(payload,o+4,0);
+
+    return makeBox("ctts", payload, headerSize(ctts) === 16);
+  }
+
+  function patchStsz(stsz, fakeCount){
+    var oldPayload = stsz.slice(headerSize(stsz));
+    var payload = new Uint8Array(oldPayload.length + fakeCount * 4);
+    payload.set(oldPayload,0);
+
+    var oldCount = readU32(stsz,16);
+    writeU32(payload,8,oldCount + fakeCount);
+
+    var o = oldPayload.length;
+
+    for(var i = 0; i < fakeCount; i++, o += 4){
+      writeU32(payload,o,8);
+    }
+
+    return makeBox("stsz", payload, headerSize(stsz) === 16);
+  }
+
+  function patchStsc(stsc, fakeCount, firstChunk, descId){
+    var oldPayload = stsc.slice(headerSize(stsc));
+    var payload = new Uint8Array(oldPayload.length + 12);
+    payload.set(oldPayload,0);
+
+    var n = readU32(stsc,12);
+    writeU32(payload,4,n+1);
+
+    var o = oldPayload.length;
+    writeU32(payload,o,firstChunk);
+    writeU32(payload,o+4,fakeCount);
+    writeU32(payload,o+8,descId);
+
+    return makeBox("stsc", payload, headerSize(stsc) === 16);
+  }
+
+  function patchChunkOffsets(stco, shift, appendOffsetOrNull){
+    var t = boxType(stco);
+    var oldPayload = stco.slice(headerSize(stco));
+    var step = t === "co64" ? 8 : 4;
+    var oldCount = readU32(stco,12);
+    var add = appendOffsetOrNull == null ? 0 : 1;
+    var payload = new Uint8Array(oldPayload.length + add * step);
+
+    payload.set(oldPayload,0);
+    writeU32(payload,4,oldCount + add);
+
+    for(var i = 0; i < oldCount; i++){
+      var po = 8 + i * step;
+      var old = step === 8 ? readU64(stco,headerSize(stco)+po) : readU32(stco,headerSize(stco)+po);
+      var val = old + shift;
+
+      if(step === 8){
+        writeU64(payload,po,val);
+      }else{
+        writeU32(payload,po,val);
+      }
+    }
+
+    if(add){
+      var apo = 8 + oldCount * step;
+
+      if(step === 8){
+        writeU64(payload,apo,appendOffsetOrNull);
+      }else{
+        writeU32(payload,apo,appendOffsetOrNull);
+      }
+    }
+
+    return makeBox(t, payload, headerSize(stco) === 16);
+  }
+
+  function buildPatchedMoov(moov, info, shiftExistingOffsets, fakeChunkOffset){
+
+    function rebuildStbl(stbl, isVideo){
+      return rebuildContainer(stbl, function(child,t){
+        if(t === "stco" || t === "co64"){
+          return patchChunkOffsets(child, shiftExistingOffsets, isVideo ? fakeChunkOffset : null);
+        }
+
+        if(!isVideo) return child;
+
+        if(t === "stts") return patchStts(child, info.fakeCount);
+        if(t === "ctts") return patchCtts(child, info.fakeCount);
+        if(t === "stsz") return patchStsz(child, info.fakeCount);
+        if(t === "stsc") return patchStsc(child, info.fakeCount, info.video.chunks.count + 1, info.video.stsc.lastDescId);
+
+        return child;
+      });
+    }
+
+    function rebuildMinf(minf, isVideo){
+      return rebuildContainer(minf, function(child,t){
+        if(t === "stbl"){
+          return rebuildStbl(child,isVideo);
+        }
+
+        return child;
+      });
+    }
+
+    function rebuildMdia(mdia, isVideo){
+      return rebuildContainer(mdia, function(child,t){
+        if(isVideo && t === "mdhd"){
+          return patchMdhd(child, info.newMdhdDuration);
+        }
+
+        if(t === "minf"){
+          return rebuildMinf(child,isVideo);
+        }
+
+        return child;
+      });
+    }
+
+    function rebuildEdts(edts, isVideo){
+      return rebuildContainer(edts, function(child,t){
+        if(isVideo && t === "elst"){
+          return patchElst(child, info.newMovieDuration);
+        }
+
+        return child;
+      });
+    }
+
+    function rebuildTrak(trak){
+      var isVideo = handlerType(trak) === "vide";
+
+      return rebuildContainer(trak, function(child,t){
+        if(isVideo && t === "tkhd"){
+          return patchTkhd(child, info.newMovieDuration);
+        }
+
+        if(t === "edts"){
+          return rebuildEdts(child,isVideo);
+        }
+
+        if(t === "mdia"){
+          return rebuildMdia(child,isVideo);
+        }
+
+        return child;
+      });
+    }
+
+    return rebuildContainer(moov, function(child,t){
+      if(t === "mvhd") return patchMvhd(child, info.newMvhdDuration);
+      if(t === "trak") return rebuildTrak(child);
+
+      return child;
+    });
+  }
+
+  function makeFakeData(fakeCount){
+    var out = new Uint8Array(fakeCount * FAKE_SAMPLE.length);
+
+    for(var i = 0, o = 0; i < fakeCount; i++, o += 8){
+      out.set(FAKE_SAMPLE,o);
+    }
+
+    return out;
+  }
+
+  function patchMdat(mdat, fakeData){
+    var h = headerSize(mdat);
+    var oldSize = readU32(mdat,0) === 1 ? readU64(mdat,8) : readU32(mdat,0);
+
+    if(readU32(mdat,0) === 0){
+      throw new Error("mdat size=0 is not supported.");
+    }
+
+    var newSize = oldSize + fakeData.length;
+    var out = new Uint8Array(mdat.length + fakeData.length);
+
+    out.set(mdat,0);
+    out.set(fakeData,mdat.length);
+
+    if(h === 16){
+      writeU64(out,8,newSize);
+    }else{
+      if(newSize > U32_MAX){
+        throw new Error("Patched mdat would exceed 4GB.");
+      }
+
+      writeU32(out,0,newSize);
+    }
+
+    return out;
+  }
+
+  function findTop(bytes){
+    var boxes = parseBoxes(bytes,0,bytes.length);
+    var moov = null;
+    var mdat = null;
+
+    for(var i = 0; i < boxes.length; i++){
+      if(boxes[i].type === "moov") moov = boxes[i];
+      if(boxes[i].type === "mdat") mdat = boxes[i];
+    }
+
+    if(!moov){
+      throw new Error("No moov atom found.");
+    }
+
+    if(!mdat){
+      throw new Error("No mdat atom found.");
+    }
+
+    return {
+      boxes:boxes,
+      moov:moov,
+      mdat:mdat
+    };
+  }
+
+  function buildSanMethodPatch(file, bytes){
+    var top = findTop(bytes);
+    var moovBytes = bytes.slice(top.moov.start, top.moov.end);
+    var mdatBytes = bytes.slice(top.mdat.start, top.mdat.end);
+    var info = analyzeMoov(moovBytes);
+
+    var testMoov = buildPatchedMoov(moovBytes, info, 0, 0);
+    var moovDelta = testMoov.length - moovBytes.length;
+    var moovBeforeMdat = top.moov.start < top.mdat.start;
+    var shiftExistingOffsets = moovBeforeMdat ? moovDelta : 0;
+    var oldMdatHeader = top.mdat.header;
+    var oldMdatDataSize = top.mdat.size - oldMdatHeader;
+    var newMdatStart = top.mdat.start + (moovBeforeMdat ? moovDelta : 0);
+    var fakeChunkOffset = newMdatStart + oldMdatHeader + oldMdatDataSize;
+    var finalMoov = buildPatchedMoov(moovBytes, info, shiftExistingOffsets, fakeChunkOffset);
+    var fakeData = makeFakeData(info.fakeCount);
+    var finalMdat = patchMdat(mdatBytes, fakeData);
+
+    var parts = [];
+
+    for(var i = 0; i < top.boxes.length; i++){
+      var b = top.boxes[i];
+
+      if(b.type === "moov"){
+        parts.push(finalMoov);
+      }else if(b.type === "mdat"){
+        parts.push(finalMdat);
+      }else{
+        parts.push(bytes.slice(b.start,b.end));
+      }
+    }
+
+    var output = concat(parts);
+
+    return {
+      output:output,
+      filename:"san_method.mp4",
+      realSamples:info.video.stsz.sampleCount,
+      fakeSamples:info.fakeCount,
+      fps:info.frameRate,
+      oldVisibleSec:info.oldVisibleSec,
+      newVisibleSec:info.newVisibleSec
+    };
+  }
+
+  function getBasicVideoInfo(file){
+    return new Promise(function(resolve){
+      var video = document.createElement("video");
+      var url = URL.createObjectURL(file);
+
+      video.preload = "metadata";
+      video.muted = true;
+      video.playsInline = true;
+
+      video.onloadedmetadata = function(){
+        var duration = video.duration || 0;
+        URL.revokeObjectURL(url);
+
+        resolve({
+          duration:duration,
+          bitrate:formatMbps(file.size * 8, duration)
+        });
+      };
+
+      video.onerror = function(){
+        URL.revokeObjectURL(url);
+
+        resolve({
+          duration:0,
+          bitrate:"n/a"
+        });
+      };
+
+      video.src = url;
+    });
+  }
+
+  async function analyzeSelectedFile(file){
+    var basic = await getBasicVideoInfo(file);
+    var fps = null;
 
     try{
-      var info = await getVideoInfo(selectedFile);
+      var bytes = new Uint8Array(await file.arrayBuffer());
+      var top = findTop(bytes);
+      var moovBytes = bytes.slice(top.moov.start, top.moov.end);
+      var info = analyzeMoov(moovBytes);
+      fps = info.frameRate;
+    }catch(e){
+      fps = null;
+    }
 
-      buildResolutionOptions(info);
+    return {
+      name:file.name,
+      sizeText:formatSize(file.size),
+      bitrate:basic.bitrate,
+      fps:fps
+    };
+  }
 
-      optionBox.style.display = "block";
+  function showAnalysis(data){
+    analysisBox.style.display = "block";
 
-      videoInfoText.innerHTML =
-        "Resolusi asli: " + info.width + "x" + info.height + "<br>" +
-        "Durasi: " + formatDuration(info.duration) + "<br>" +
-        "Ukuran: " + formatSize(info.size);
+    analysisContent.innerHTML =
+      "Nama file: <b style='color:#19fff4'>" + data.name + "</b><br>" +
+      "FPS: <b style='color:#19fff4'>" + formatFPS(data.fps) + "</b><br>" +
+      "Bitrate: <b style='color:#19fff4'>" + data.bitrate + "</b><br>" +
+      "Ukuran file: <b style='color:#19fff4'>" + data.sizeText + "</b>";
+  }
 
-      log("> Resolusi: " + info.width + "x" + info.height);
-      log("> Durasi: " + formatDuration(info.duration));
-      log("> Ukuran: " + formatSize(info.size));
-      log("> Pilih FPS dan resolusi, lalu tekan INJECT VIDEO.");
+  function formatFPS(fps){
+    if(!fps || !isFinite(fps)) return "n/a";
+    return fps.toFixed(2).replace(".00","") + " FPS";
+  }
+
+  videoInput.addEventListener("change", async function(e){
+    selectedFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+
+    resetDownload();
+    resetProgress();
+
+    if(selectedFile){
+      injectBtn.disabled = false;
+
+      fileName.innerHTML = "File: " + selectedFile.name;
+
+      clearTerminal();
+      log("> Video MP4 terdeteksi.");
+      log("> Batas ukuran: tanpa batas.");
+      log("> Membaca analisis video...");
+
+      try{
+        lastAnalysis = await analyzeSelectedFile(selectedFile);
+        showAnalysis(lastAnalysis);
+
+        log("> Nama file: " + lastAnalysis.name);
+        log("> FPS: " + formatFPS(lastAnalysis.fps));
+        log("> Bitrate: " + lastAnalysis.bitrate);
+        log("> Ukuran: " + lastAnalysis.sizeText);
+        log("> Siap menjalankan SAN METHOD inject.");
+      }catch(err){
+        log("> Analisis gagal: " + err.message);
+        log("> Video tetap bisa diproses.");
+      }
 
       setProgress(0, "Video siap diproses.");
-    }catch(err){
-      optionBox.style.display = "none";
+    }else{
+      selectedFile = null;
+      injectBtn.disabled = true;
 
-      log("> Gagal membaca info video.");
-      log("> " + err.message);
-      log("> Video tetap bisa diproses mode aman.");
+      fileName.innerHTML = "Belum ada file dipilih.";
+      analysisBox.style.display = "none";
+
+      clearTerminal();
+      log("> Pilih video MP4 terlebih dahulu.");
     }
-  }else{
-    selectedFile = null;
+  });
+
+  injectBtn.addEventListener("click", async function(){
+    if(!selectedFile) return;
+
     injectBtn.disabled = true;
 
-    optionBox.style.display = "none";
-    fileName.innerHTML = "Belum ada file dipilih.";
-
     clearTerminal();
-    log("> Pilih video MP4 terlebih dahulu.");
-
+    resetDownload();
     resetProgress();
-  }
-});
 
-/* INJECT VIDEO */
-injectBtn.addEventListener("click", async function(){
-  if(!selectedFile) return;
-
-  injectBtn.disabled = true;
-
-  clearTerminal();
-  resetDownload();
-  resetProgress();
-
-  startProgress();
-
-  try{
-    var selectedFPS = fpsSelect.value;
-    var selectedResolution = resolutionSelect.value;
-    var filters = getVideoFilters();
-
-    log("> Memulai SAN METHOD injector...");
-    await sleep(400);
-
-    log("> Mode FPS: " + (selectedFPS === "original" ? "Original" : selectedFPS + " FPS"));
-    log("> Mode Resolusi: " + selectedResolution);
-
-    log("> Memuat engine patcher...");
-    await loadCore();
-
-    var fetchFile = FFmpeg.fetchFile;
-
-    try{ ffmpeg.FS("unlink", "input.mp4"); }catch(e){}
-    try{ ffmpeg.FS("unlink", "output.mp4"); }catch(e){}
-
-    log("> Membaca file MP4...");
-
-    ffmpeg.FS(
-      "writeFile",
-      "input.mp4",
-      await fetchFile(selectedFile)
-    );
-
-    await sleep(400);
-
-    if(filters){
-      log("> Menjalankan real convert...");
-      log("> Filter: " + filters);
-
-      await ffmpeg.run(
-        "-y",
-        "-i", "input.mp4",
-        "-map", "0:v:0",
-        "-map", "0:a?",
-        "-vf", filters,
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "18",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "-movflags", "+faststart",
-        "-metadata", "title=SAN METHOD HD 120FPS",
-        "-metadata", "comment=SAN METHOD VIDEO OPTIMIZER",
-        "-metadata", "encoder=SAN_METHOD_PATCHER",
-        "output.mp4"
-      );
-    }else{
-      log("> Menjalankan fast inject...");
-      log("> Mode: remux + faststart + metadata clean.");
-
-      await ffmpeg.run(
-        "-y",
-        "-i", "input.mp4",
-        "-map", "0",
-        "-c", "copy",
-        "-movflags", "+faststart",
-        "-metadata", "title=SAN METHOD HD 120FPS",
-        "-metadata", "comment=SAN METHOD FAST INJECT",
-        "-metadata", "encoder=SAN_METHOD_PATCHER",
-        "output.mp4"
-      );
-    }
-
-    log("> Finalisasi output...");
-    await sleep(500);
-
-    await downloadOutput();
-
-    finishProgress("Selesai. File otomatis terdownload.");
-
-    log("> Inject berhasil.");
-    log("> Output: san_method.mp4");
-  }catch(err){
-    log("> Inject utama gagal.");
-    log("> " + err.message);
-    log("> Membuat file mode aman...");
+    startProgress();
 
     try{
-      await safeDownloadOriginal();
+      log("> Memulai SAN METHOD injector...");
+      log("> Batas ukuran: tanpa batas.");
+      log("> Membaca file...");
 
-      finishProgress("Mode aman selesai. File tetap terdownload.");
+      var bytes = new Uint8Array(await selectedFile.arrayBuffer());
 
-      log("> File aman berhasil dibuat.");
+      log("> Menjalankan patch sample table...");
+      var patch = buildSanMethodPatch(selectedFile, bytes);
+
+      log("> Samples: " + patch.realSamples + " + " + patch.fakeSamples);
+      log("> FPS: " + formatFPS(patch.fps));
+
+      var blob = new Blob([patch.output], {
+        type:selectedFile.type || "video/mp4"
+      });
+
+      var url = URL.createObjectURL(blob);
+      currentUrl = url;
+
+      downloadBtn.href = url;
+      downloadBtn.download = "san_method.mp4";
+      downloadBtn.style.display = "block";
+
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "san_method.mp4";
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      finishProgress("Selesai. File otomatis terdownload.");
+
+      log("> Inject berhasil.");
       log("> Output: san_method.mp4");
-    }catch(e){
-      finishProgress("Gagal membuat file.");
+    }catch(err){
+      finishProgress("Inject gagal.");
 
-      log("> Gagal membuat file.");
-      log("> " + e.message);
+      log("> Inject gagal.");
+      log("> " + (err && err.message ? err.message : "Unknown error"));
     }
-  }
 
-  injectBtn.disabled = false;
+    injectBtn.disabled = false;
+  });
+
 });
 </script>
